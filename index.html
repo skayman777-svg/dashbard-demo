@@ -7,27 +7,35 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <style>
 :root{
-  --font-anthropic-sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
-  --font-anthropic-serif:Georgia,'Times New Roman',serif;
-  --cds-font-size-body:15px;--cds-font-size-title:28px;
-  --cds-font-size-heading:18px;--cds-font-size-caption:12px;
-  --cds-font-weight-medium:500;
+  /* Тема TradingView Dark */
+  --font-anthropic-sans: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif;
+  --font-anthropic-serif: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif;
+  --cds-font-size-body:14px;--cds-font-size-title:24px;
+  --cds-font-size-heading:16px;--cds-font-size-caption:12px;
+  --cds-font-weight-medium:600;
   --cds-gap-xs:4px;--cds-gap-sm:8px;--cds-gap-md:16px;--cds-gap-lg:24px;
   --cds-pad-xs:4px;--cds-pad-sm:8px;--cds-pad-md:12px;--cds-pad-lg:20px;
-  --cds-radius:8px;
-  --color-bg:#faf9f5;--color-panel:#ffffff;
-  --color-fg:#1f1e1c;--color-fg-muted:#6b6862;
-  --color-border-line:#e5e1d8;
-  --color-ok:#2e7d32;--color-bad:#c62828;--color-warn:#b26a00;
-  --cds-surface-popover:#ffffff;--cds-border:#e5e1d8;
-  --cds-shadow-popover:0 4px 16px rgba(0,0,0,.08);
-  --cds-text-secondary:#6b6862;
-  --cds-chart-muted:#b8b3a8;--cds-chart-grid:#eee9df;
-  --cds-chart-axis:#c9c3b6;--cds-chart-reference:#8a857a;
-  --cds-chart-status-critical:#c62828;
+  --cds-radius:6px;
+  --color-bg:#131722;
+  --color-panel:#1e222d;
+  --color-fg:#d1d4dc;
+  --color-fg-muted:#787b86;
+  --color-border-line:#2a2e39;
+  --color-ok:#089981;
+  --color-bad:#f23645;
+  --color-warn:#ff9800;
+  --cds-surface-popover:#2a2e39;
+  --cds-border:#363a45;
+  --cds-shadow-popover:0 4px 16px rgba(0,0,0,.4);
+  --cds-text-secondary:#787b86;
+  --cds-chart-muted:#363a45;
+  --cds-chart-grid:#2a2e39;
+  --cds-chart-axis:#363a45;
+  --cds-chart-reference:#787b86;
+  --cds-chart-status-critical:#f23645;
   --cds-dur-slow:200ms;
 }
-body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans)}
+body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);-webkit-font-smoothing:antialiased}
 </style>
 <style>
 .lx{max-width:1180px;margin-inline:auto;display:grid;gap:var(--cds-gap-lg);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-body);color:var(--color-fg)}
@@ -35,37 +43,38 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
 .lx [hidden]{display:none!important}
 .lx-head{display:grid;gap:var(--cds-gap-sm)}
 .lx-titlerow{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cds-gap-sm)}
-.lx-title{margin:0;font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);line-height:1.15}
-.lx-badge{border:1px solid var(--color-border-line);border-radius:999px;padding:1px var(--cds-pad-sm);font-size:var(--cds-font-size-caption);letter-spacing:.06em;text-transform:uppercase;color:var(--color-fg-muted)}
-.lx-take{margin:0;font-size:var(--cds-font-size-heading);line-height:1.45;max-width:62rem}
+.lx-title{margin:0;font-family:var(--font-anthropic-sans);font-weight:600;font-size:var(--cds-font-size-title);line-height:1.15;letter-spacing:-0.02em}
+.lx-badge{border:1px solid var(--color-border-line);border-radius:4px;padding:2px var(--cds-pad-sm);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-fg-muted);font-weight:600}
+.lx-take{margin:0;font-size:var(--cds-font-size-heading);line-height:1.45;max-width:62rem;color:#fff}
 .lx-note{margin:0;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);line-height:1.45}
-.lx-filters{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm) var(--cds-gap-lg);align-items:center}
+.lx-filters{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm) var(--cds-gap-lg);align-items:center;background:var(--color-panel);padding:12px;border-radius:var(--cds-radius);border:1px solid var(--color-border-line)}
 .lx-fgroup{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cds-gap-sm)}
-.lx-flabel{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
-.lx-seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius)}
-.lx-seg button{font:inherit;font-size:var(--cds-font-size-caption);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:0;background:transparent;color:var(--color-fg-muted);border-radius:calc(var(--cds-radius) - 2px);cursor:pointer}
-.lx-seg button[aria-pressed=true]{background:var(--color-bg);color:var(--color-fg);box-shadow:0 0 0 1px var(--color-border-line)}
-.lx-seg button:focus-visible,.lx-link:focus-visible{outline:2px solid var(--color-fg);outline-offset:1px}
+.lx-flabel{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);font-weight:600}
+.lx-seg{display:inline-flex;flex-wrap:wrap;gap:1px;padding:1px;background:var(--color-bg);border:1px solid var(--color-border-line);border-radius:4px}
+.lx-seg button{font:inherit;font-size:var(--cds-font-size-caption);padding:4px 10px;border:0;background:transparent;color:var(--color-fg-muted);border-radius:3px;cursor:pointer;transition:all 0.2s}
+.lx-seg button:hover{color:var(--color-fg)}
+.lx-seg button[aria-pressed=true]{background:#2962FF;color:#fff;font-weight:600}
+.lx-seg button:focus-visible,.lx-link:focus-visible{outline:2px solid #2962FF;outline-offset:1px}
 .lx-kpi{container-type:inline-size}
 .lx-tiles{display:grid;gap:var(--cds-gap-md);grid-template-columns:repeat(2,minmax(0,1fr))}
 @container (min-width: 600px){.lx-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.lx-hint{min-height:0}}
 @container (max-width: 420px){.lx-num{font-size:calc(var(--cds-font-size-title) * .85)}}
-.lx-tile{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-md) var(--cds-pad-lg);display:grid;gap:var(--cds-gap-xs);align-content:start;min-width:0}
+.lx-tile{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:12px 16px;display:grid;gap:var(--cds-gap-xs);align-content:start;min-width:0}
 .lx-tile-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--cds-gap-sm)}
-.lx-tile-name{font-weight:var(--cds-font-weight-medium)}
+.lx-tile-name{font-weight:var(--cds-font-weight-medium);font-size:13px;color:var(--color-fg-muted);text-transform:uppercase;letter-spacing:0.05em}
 .lx-win{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);white-space:nowrap}
-.lx-hint{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);min-height:2.6em;line-height:1.3}
-.lx-num{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lx-hint{font-size:11px;color:var(--color-fg-muted);min-height:2.6em;line-height:1.3}
+.lx-num{font-family:var(--font-anthropic-sans);font-weight:600;font-size:28px;line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap;color:#fff}
 .lx-dline{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--cds-gap-xs);font-size:var(--cds-font-size-caption)}
-.lx-delta{font-weight:var(--cds-font-weight-medium);font-variant-numeric:tabular-nums}
-.lx-delta.good{color:var(--color-ok)}
-.lx-delta.bad{color:var(--color-bad)}
-.lx-delta.flat{color:var(--color-fg-muted)}
+.lx-delta{font-weight:600;font-variant-numeric:tabular-nums;padding:2px 6px;border-radius:4px}
+.lx-delta.good{color:var(--color-ok);background:rgba(8, 153, 129, 0.1)}
+.lx-delta.bad{color:var(--color-bad);background:rgba(242, 54, 69, 0.1)}
+.lx-delta.flat{color:var(--color-fg-muted);background:transparent}
 .lx-vs{color:var(--color-fg-muted)}
-.lx-spark{min-height:36px}
-.lx-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);display:grid;gap:var(--cds-gap-md);min-width:0;container-type:inline-size;align-content:start}
-.lx-card-head{display:grid;gap:2px}
-.lx-h{margin:0;font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium)}
+.lx-spark{min-height:36px;margin-top:8px}
+.lx-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:16px 20px;display:grid;gap:var(--cds-gap-md);min-width:0;container-type:inline-size;align-content:start}
+.lx-card-head{display:grid;gap:4px;border-bottom:1px solid var(--color-border-line);padding-bottom:12px;margin-bottom:4px}
+.lx-h{margin:0;font-size:var(--cds-font-size-heading);font-weight:600;color:#fff}
 .lx-grid2{display:grid;gap:var(--cds-gap-md);grid-template-columns:repeat(auto-fit,minmax(min(100%,24rem),1fr))}
 .lx-chart{position:relative;min-width:0}
 .lx-chart-main{min-height:330px}
@@ -75,26 +84,28 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
 .lx-sw{display:inline-block;width:.625rem;height:.625rem;border-radius:2px;flex:none}
 .lx-sw.line{height:2px;width:.875rem;border-radius:0}
 .lx-sw.dash{width:.875rem;height:0;border-radius:0;background:transparent}
-.lx-tick{fill:var(--color-fg-muted);font-size:var(--cds-font-size-caption);font-family:var(--font-anthropic-sans)}
-.lx-pct{fill:var(--color-fg-muted);font-size:var(--cds-font-size-caption);font-family:var(--font-anthropic-sans);font-variant-numeric:tabular-nums}
-.lx-tip{position:absolute;z-index:5;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);min-width:9rem;max-width:18rem}
-.lx-tip-h{color:var(--cds-text-secondary);margin-bottom:2px}
-.lx-tip-r{display:flex;align-items:center;gap:var(--cds-gap-xs);white-space:nowrap}
-.lx-tip-k{flex:1}
-.lx-tip-v{font-variant-numeric:tabular-nums;padding-left:var(--cds-gap-sm)}
+.lx-tick{fill:var(--color-fg-muted);font-size:11px;font-family:var(--font-anthropic-sans)}
+.lx-pct{fill:var(--color-fg);font-size:11px;font-family:var(--font-anthropic-sans);font-weight:600;font-variant-numeric:tabular-nums}
+.lx-tip{position:absolute;z-index:5;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:4px;box-shadow:var(--cds-shadow-popover);padding:8px 12px;font-size:12px;min-width:9rem;max-width:18rem}
+.lx-tip-h{color:#fff;font-weight:600;margin-bottom:6px;border-bottom:1px solid var(--cds-border);padding-bottom:4px}
+.lx-tip-r{display:flex;align-items:center;gap:var(--cds-gap-xs);white-space:nowrap;margin-bottom:2px}
+.lx-tip-k{flex:1;color:var(--color-fg-muted)}
+.lx-tip-v{font-variant-numeric:tabular-nums;padding-left:var(--cds-gap-sm);color:#fff;font-weight:500}
 .lx-fail{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:inherit;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
 .lx-faildot{width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad);flex:none}
 .lx-scroll{overflow-x:auto}
 .lx-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.lx-table th{position:sticky;top:0;text-align:left;font-weight:var(--cds-font-weight-medium);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap;background:var(--color-panel)}
-.lx-table td{padding:var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);vertical-align:middle}
+.lx-table th{position:sticky;top:0;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-fg-muted);padding:10px var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap;background:var(--color-panel)}
+.lx-table td{padding:10px var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);vertical-align:middle;color:#d1d4dc}
+.lx-table tr:hover td{background:rgba(255,255,255,0.02)}
 .lx-table tr:last-child td{border-bottom:0}
 .lx-table .num{text-align:right;white-space:nowrap}
-.lx-table tr.sel td{background:var(--color-bg)}
-.lx-table tr.tot td{font-weight:var(--cds-font-weight-medium)}
-.lx-link{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--color-border-line);text-underline-offset:3px}
-.lx-cellbar{display:grid;gap:3px;justify-items:end}
-.lx-bar{height:4px;border-radius:2px;background:var(--cds-chart-muted);opacity:.55;min-width:2px}
+.lx-table tr.sel td{background:rgba(41, 98, 255, 0.08)}
+.lx-table tr.tot td{font-weight:600;color:#fff;border-top:2px solid var(--color-border-line)}
+.lx-link{font:inherit;color:#2962FF;background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:none;font-weight:500}
+.lx-link:hover{text-decoration:underline}
+.lx-cellbar{display:grid;gap:4px;justify-items:end}
+.lx-bar{height:4px;border-radius:2px;background:#2962FF;opacity:0.8;min-width:2px}
 .lx-chip{display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap}
 .lx-chip i{width:.5rem;height:.5rem;border-radius:50%;background:currentColor;flex:none}
 .lx-chip.ok{color:var(--color-ok)}
@@ -104,11 +115,11 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
 .lx-skel-row{min-height:5rem}
 .lx-fail.row{min-height:5rem}
 .lx-foot{display:grid;gap:var(--cds-gap-sm)}
-.lx-foot details{border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-sm) var(--cds-pad-md)}
-.lx-foot summary{cursor:pointer;font-weight:var(--cds-font-weight-medium)}
+.lx-foot details{border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:12px 16px;background:var(--color-panel)}
+.lx-foot summary{cursor:pointer;font-weight:600;color:#fff;font-size:13px}
 .lx-foot dl{margin:var(--cds-gap-sm) 0 0;display:grid;gap:var(--cds-gap-xs)}
-.lx-foot dt{font-weight:var(--cds-font-weight-medium)}
-.lx-foot dd{margin:0;color:var(--color-fg-muted)}
+.lx-foot dt{font-weight:600;color:#fff;font-size:12px}
+.lx-foot dd{margin:0;color:var(--color-fg-muted);font-size:12px}
 @container (max-width: 600px){.lx-hide-sm{display:none}}
 @container (max-width: 480px){.lx-hide-xs{display:none}.lx-table th,.lx-table td{padding-inline:var(--cds-pad-xs)}}
 </style>
@@ -135,42 +146,36 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
   <section id="kpi" class="lx-kpi" aria-label="Ключевые показатели"><div class="lx-tiles" id="lx-tiles">
       <article class="lx-tile" id="tile-revenue">
         <div class="lx-tile-top"><span class="lx-tile-name">Выручка</span><span class="lx-win" data-win>—</span></div>
-        <div class="lx-hint">сумма продаж за окно</div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="revenue">—</div>
         <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="revenue_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-orders">
         <div class="lx-tile-top"><span class="lx-tile-name">Заказы</span><span class="lx-win" data-win>—</span></div>
-        <div class="lx-hint">число оформленных заказов</div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="orders">—</div>
         <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="orders_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-aov">
         <div class="lx-tile-top"><span class="lx-tile-name">Средний чек</span><span class="lx-win" data-win>—</span></div>
-        <div class="lx-hint">выручка ÷ заказы</div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="aov">—</div>
         <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="aov_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-margin">
         <div class="lx-tile-top"><span class="lx-tile-name">Валовая маржа</span><span class="lx-win" data-win>—</span></div>
-        <div class="lx-hint">(выручка − себестоимость) ÷ выручка</div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="margin">—</div>
         <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="margin_delta_pp">—</span><span class="lx-vs">к пред. периоду</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-drr">
         <div class="lx-tile-top"><span class="lx-tile-name">Доля рекламы</span><span class="lx-win" data-win>—</span></div>
-        <div class="lx-hint">расходы на рекламу ÷ выручка (ДРР)</div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="drr">—</div>
         <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="drr_delta_pp">—</span><span class="lx-vs">к пред. периоду</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-new">
         <div class="lx-tile-top"><span class="lx-tile-name">Новые клиенты</span><span class="lx-win" data-win>—</span></div>
-        <div class="lx-hint">первая покупка в окне</div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="new_customers">—</div>
         <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="new_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
@@ -189,14 +194,14 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
     <section class="lx-card" id="plan">
       <div class="lx-card-head">
         <h2 class="lx-h">План и факт по месяцам</h2>
-        <p class="lx-note">Выручка выбранного канала против плана. Текущий месяц сравнивается с планом на прошедшие дни.</p>
+        <p class="lx-note">Выручка выбранного канала против плана.</p>
       </div>
       <div class="lx-chart lx-chart-sm dash-skeleton" id="chart-plan" data-source="plan_fact"></div>
     </section>
     <section class="lx-card" id="mix">
       <div class="lx-card-head">
         <h2 class="lx-h">Выручка по каналам</h2>
-        <p class="lx-note" id="mix-note">Структура выручки за выбранный период; выбранный канал выделен.</p>
+        <p class="lx-note" id="mix-note">Структура выручки за выбранный период.</p>
       </div>
       <div class="lx-chart lx-chart-sm dash-skeleton" id="chart-mix" data-source="sales_daily"></div>
     </section>
@@ -205,7 +210,7 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
   <section class="lx-card" id="channels">
     <div class="lx-card-head">
       <h2 class="lx-h">Каналы продаж</h2>
-      <p class="lx-note">Нажмите на название канала, чтобы отфильтровать всю панель.</p>
+      <p class="lx-note">Нажмите на название канала, чтобы отфильтровать панель.</p>
     </div>
     <div class="lx-scroll">
       <table class="lx-table" id="tbl-channels" data-source="kpis" data-row-key="k">
@@ -228,7 +233,7 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
   <section class="lx-card" id="products">
     <div class="lx-card-head">
       <h2 class="lx-h">Топ товаров</h2>
-      <p class="lx-note" id="prod-note">Восемь товаров с наибольшей выручкой за выбранный период и канал.</p>
+      <p class="lx-note" id="prod-note">Восемь товаров с наибольшей выручкой.</p>
     </div>
     <div class="lx-scroll">
       <table class="lx-table" id="tbl-products" data-source="top_products" data-row-key="k">
@@ -249,7 +254,7 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
   <section class="lx-card" id="sources">
     <div class="lx-card-head">
       <h2 class="lx-h">Источники данных</h2>
-      <p class="lx-note">Откуда панель берёт цифры и когда данные обновлялись в последний раз (время UTC).</p>
+      <p class="lx-note">Откуда панель берёт цифры (время UTC).</p>
     </div>
     <div class="lx-scroll">
       <table class="lx-table" id="tbl-sources" data-source="pipeline" data-row-key="system">
@@ -274,12 +279,9 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
         <dt>Валовая маржа</dt><dd>(выручка − себестоимость) ÷ выручка.</dd>
         <dt>Доля рекламы (ДРР)</dt><dd>расходы на рекламу ÷ выручка. Чем ниже, тем лучше.</dd>
         <dt>Средний чек</dt><dd>выручка ÷ число заказов.</dd>
-        <dt>Конверсия</dt><dd>заказы ÷ посещения; считается только для интернет-магазина и маркетплейсов, у оптовых и розничных продаж посещений нет.</dd>
-        <dt>Сравнение с предыдущим периодом</dt><dd>берётся окно такой же длины, которое заканчивается перед выбранным. Для «Весь период» сравнения нет.</dd>
-        <dt>План на неполный месяц</dt><dd>полный план месяца, умноженный на долю прошедших дней.</dd>
+        <dt>Конверсия</dt><dd>заказы ÷ посещения (для интернет-магазина и маркетплейсов).</dd>
       </dl>
     </details>
-    <p class="lx-note">Источники подключаются к CRM, учётной системе, рекламным кабинетам, API маркетплейсов, Excel и Google Таблицам.</p>
   </footer>
 </div>
 
@@ -298,7 +300,8 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
   }
   function emit(){ _subs.forEach(fn => fn()); }
   window.dash = {
-    colors:['#C15F3C','#3C6E71','#8A5A44','#5B7DB1','#9A8C98','#6B8F71','#B5838D','#7F6A5A'],
+    // Цвета TradingView
+    colors:['#2962FF', '#089981', '#f23645', '#ff9800', '#9c27b0', '#00bcd4', '#ffeb3b', '#e91e63'],
     calc(id, def){ _calcs.set(id, def); },
     data(id){
       if (_store.has(id)) return _store.get(id);
@@ -739,9 +742,9 @@ function drawMain(host, S, channel){
   placeLabels(svg, ticks, h-8, ml, w-2);
   const gid = 'lx-g-' + Math.random().toString(36).slice(2,8);
   const grad = svg.append('defs').append('linearGradient').attr('id',gid).attr('x1',0).attr('x2',0).attr('y1',0).attr('y2',1);
-  [[0,0.26],[0.25,0.16],[0.5,0.08],[0.75,0.03],[1,0]].forEach(([o,a]) => grad.append('stop').attr('offset',o).style('stop-color',ACCENT).style('stop-opacity',a));
+  [[0,0.3],[0.3,0.15],[0.6,0.05],[1,0]].forEach(([o,a]) => grad.append('stop').attr('offset',o).style('stop-color',ACCENT).style('stop-opacity',a));
   svg.append('path').attr('d', d3.area().x((_,i) => px(i)).y0(y(0)).y1(v => y(v))(cur)).attr('fill','url(#'+gid+')');
-  if (hasPrev) svg.append('path').attr('d', d3.line().x((_,i) => px(i)).y(v => y(v))(prv)).attr('fill','none').style('stroke','var(--cds-chart-muted)').attr('stroke-width',1.75).attr('stroke-dasharray','4 4');
+  if (hasPrev) svg.append('path').attr('d', d3.line().x((_,i) => px(i)).y(v => y(v))(prv)).attr('fill','none').style('stroke','var(--cds-chart-muted)').attr('stroke-width',1.5).attr('stroke-dasharray','4 4');
   svg.append('path').attr('d', d3.line().x((_,i) => px(i)).y(v => y(v))(cur)).attr('fill','none').style('stroke',ACCENT).attr('stroke-width',2).attr('stroke-linecap','round').attr('stroke-linejoin','round');
   const li = S.n-1;
   svg.append('circle').attr('cx',px(li)).attr('cy',y(cur[li])).attr('r',3.5).style('fill',ACCENT).style('stroke','var(--color-panel)').attr('stroke-width',2);
@@ -793,7 +796,7 @@ function drawPlan(host, rows, channel){
   data.forEach(r => {
     const x0 = x(r.month);
     svg.append('rect').attr('x',x0).attr('y',y(r.fact)).attr('width',bw).attr('height',Math.max(0, y(0)-y(r.fact))).attr('rx',Math.min(4,bw/2))
-      .style('fill', r.pct >= 1 ? ACCENT : 'var(--cds-chart-status-critical)').style('opacity', r.partial ? 0.55 : 1);
+      .style('fill', r.pct >= 1 ? ACCENT : 'var(--cds-chart-status-critical)').style('opacity', r.partial ? 0.5 : 1);
     svg.append('line').attr('x1',x0-3).attr('x2',x0+bw+3).attr('y1',y(r.plan)).attr('y2',y(r.plan)).style('stroke','var(--cds-chart-reference)').attr('stroke-width',2);
     if (showPct) svg.append('text').attr('class','lx-pct').attr('x',x0+bw/2).attr('y',y(Math.max(r.fact,r.plan))-6).attr('text-anchor','middle').text(fP0(r.pct));
   });
@@ -853,8 +856,8 @@ function drawMix(host, S, parsed, period, channel){
     layer.forEach((seg, bi) => {
       const hh = y(seg[0]) - y(seg[1]);
       if (hh <= 0) return;
-      svg.append('rect').attr('x',x(bi)).attr('y',y(seg[1])).attr('width',bw).attr('height',Math.max(0,hh-2)).attr('rx',Math.min(2,bw/2))
-        .style('fill', C[ci]).style('opacity', channel === ALL || chs[ci] === channel ? 1 : 0.3);
+      svg.append('rect').attr('x',x(bi)).attr('y',y(seg[1])).attr('width',bw).attr('height',Math.max(0,hh-1)).attr('rx',Math.min(2,bw/2))
+        .style('fill', C[ci]).style('opacity', channel === ALL || chs[ci] === channel ? 1 : 0.2);
     });
   });
   const dim = t => { const d = new Date(t); return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth()+1, 0)).getUTCDate(); };
