@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Обложка</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    background-color: #0b0e14;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  
+  /* Контейнер обложки */
+  .cover {
+    width: 100%; max-width: 800px;
+    aspect-ratio: 16 / 9;
+    background: radial-gradient(circle at top right, #1e222d 0%, #131722 100%);
+    border: 1px solid #2a2e39;
+    border-radius: 16px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative;
+    padding: 48px;
+    box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: space-between;
+    overflow: hidden;
+  }
+
+  /* Декоративная сетка на фоне */
+  .cover::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-image: linear-gradient(#1e222d 1px, transparent 1px), linear-gradient(90deg, #1e222d 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.2; pointer-events: none;
+  }
+
+  /* Свечение сзади */
+  .glow {
+    position: absolute; width: 400px; height: 400px;
+    background: #2962FF; filter: blur(120px); opacity: 0.15;
+    top: -100px; right: -100px; border-radius: 50%;
+  }
+
+  .content { position: relative; z-index: 2; }
+  
+  .badge {
+    display: inline-block; background: rgba(8, 153, 129, 0.15);
+    color: #089981; padding: 6px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 20px; border: 1px solid rgba(8, 153, 129, 0.3);
+  }
+
+  h1 {
+    color: #ffffff; font-size: 42px; margin: 0 0 16px 0; 
+    line-height: 1.1; letter-spacing: -1px; font-weight: 700;
+  }
+
+  p {
+    color: #787b86; font-size: 18px; margin: 0; max-width: 500px; line-height: 1.5;
+  }
+
+  .tags { display: flex; gap: 10px; margin-top: 32px; position: relative; z-index: 2; }
+  .tags span {
+    background: rgba(255,255,255,0.05); border: 1px solid #2a2e39;
+    color: #d1d4dc; padding: 8px 16px; border-radius: 8px;
+    font-size: 14px; font-weight: 500;
+  }
+
+  /* График */
+  .chart {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 180px;
+    z-index: 1; opacity: 0.8;
+  }
+  .chart svg { width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+
+  <div class="cover">
+    <div class="glow"></div>
+    
+    <div class="content">
+      <div class="badge">Case Study</div>
+      <h1>Дашборд бизнес-метрик</h1>
+      <p>Интерактивная панель продаж с адаптивными графиками и фильтрацией данных.</p>
+    </div>
+
+    <div class="tags">
+      <span>Vanilla JS</span>
+      <span>D3.js</span>
+      <span>UI/UX Design</span>
+    </div>
+
+    <!-- График на фоне -->
+    <div class="chart">
+      <svg viewBox="0 0 800 180" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#089981" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#089981" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,150 Q50,140 100,160 T200,110 T300,130 T400,70 T500,90 T600,40 T700,60 L800,20 L800,180 L0,180 Z" fill="url(#grad)"/>
+        <path d="M0,150 Q50,140 100,160 T200,110 T300,130 T400,70 T500,90 T600,40 T700,60 L800,20" fill="none" stroke="#089981" stroke-width="3" stroke-linecap="round"/>
+        
+        <!-- Красная линия (для красоты) -->
+        <path d="M0,180 Q60,170 120,140 T240,150 T360,100 T480,120 T600,70 T720,90 L800,70" fill="none" stroke="#f23645" stroke-width="2" stroke-opacity="0.5" stroke-dasharray="5,5"/>
+      </svg>
+    </div>
+  </div>
+
+</body>
+</html>
