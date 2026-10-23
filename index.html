@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Бизнес-метрики — панель продаж</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<style>
+:root{
+  --font-anthropic-sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --font-anthropic-serif:Georgia,'Times New Roman',serif;
+  --cds-font-size-body:15px;--cds-font-size-title:28px;
+  --cds-font-size-heading:18px;--cds-font-size-caption:12px;
+  --cds-font-weight-medium:500;
+  --cds-gap-xs:4px;--cds-gap-sm:8px;--cds-gap-md:16px;--cds-gap-lg:24px;
+  --cds-pad-xs:4px;--cds-pad-sm:8px;--cds-pad-md:12px;--cds-pad-lg:20px;
+  --cds-radius:8px;
+  --color-bg:#faf9f5;--color-panel:#ffffff;
+  --color-fg:#1f1e1c;--color-fg-muted:#6b6862;
+  --color-border-line:#e5e1d8;
+  --color-ok:#2e7d32;--color-bad:#c62828;--color-warn:#b26a00;
+  --cds-surface-popover:#ffffff;--cds-border:#e5e1d8;
+  --cds-shadow-popover:0 4px 16px rgba(0,0,0,.08);
+  --cds-text-secondary:#6b6862;
+  --cds-chart-muted:#b8b3a8;--cds-chart-grid:#eee9df;
+  --cds-chart-axis:#c9c3b6;--cds-chart-reference:#8a857a;
+  --cds-chart-status-critical:#c62828;
+  --cds-dur-slow:200ms;
+}
+body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans)}
+</style>
+<style>
+.lx{max-width:1180px;margin-inline:auto;display:grid;gap:var(--cds-gap-lg);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-body);color:var(--color-fg)}
+.lx *{box-sizing:border-box}
+.lx [hidden]{display:none!important}
+.lx-head{display:grid;gap:var(--cds-gap-sm)}
+.lx-titlerow{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cds-gap-sm)}
+.lx-title{margin:0;font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);line-height:1.15}
+.lx-badge{border:1px solid var(--color-border-line);border-radius:999px;padding:1px var(--cds-pad-sm);font-size:var(--cds-font-size-caption);letter-spacing:.06em;text-transform:uppercase;color:var(--color-fg-muted)}
+.lx-take{margin:0;font-size:var(--cds-font-size-heading);line-height:1.45;max-width:62rem}
+.lx-note{margin:0;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);line-height:1.45}
+.lx-filters{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm) var(--cds-gap-lg);align-items:center}
+.lx-fgroup{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cds-gap-sm)}
+.lx-flabel{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.lx-seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius)}
+.lx-seg button{font:inherit;font-size:var(--cds-font-size-caption);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:0;background:transparent;color:var(--color-fg-muted);border-radius:calc(var(--cds-radius) - 2px);cursor:pointer}
+.lx-seg button[aria-pressed=true]{background:var(--color-bg);color:var(--color-fg);box-shadow:0 0 0 1px var(--color-border-line)}
+.lx-seg button:focus-visible,.lx-link:focus-visible{outline:2px solid var(--color-fg);outline-offset:1px}
+.lx-kpi{container-type:inline-size}
+.lx-tiles{display:grid;gap:var(--cds-gap-md);grid-template-columns:repeat(2,minmax(0,1fr))}
+@container (min-width: 600px){.lx-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.lx-hint{min-height:0}}
+@container (max-width: 420px){.lx-num{font-size:calc(var(--cds-font-size-title) * .85)}}
+.lx-tile{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-md) var(--cds-pad-lg);display:grid;gap:var(--cds-gap-xs);align-content:start;min-width:0}
+.lx-tile-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--cds-gap-sm)}
+.lx-tile-name{font-weight:var(--cds-font-weight-medium)}
+.lx-win{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);white-space:nowrap}
+.lx-hint{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);min-height:2.6em;line-height:1.3}
+.lx-num{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lx-dline{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--cds-gap-xs);font-size:var(--cds-font-size-caption)}
+.lx-delta{font-weight:var(--cds-font-weight-medium);font-variant-numeric:tabular-nums}
+.lx-delta.good{color:var(--color-ok)}
+.lx-delta.bad{color:var(--color-bad)}
+.lx-delta.flat{color:var(--color-fg-muted)}
+.lx-vs{color:var(--color-fg-muted)}
+.lx-spark{min-height:36px}
+.lx-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);display:grid;gap:var(--cds-gap-md);min-width:0;container-type:inline-size;align-content:start}
+.lx-card-head{display:grid;gap:2px}
+.lx-h{margin:0;font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium)}
+.lx-grid2{display:grid;gap:var(--cds-gap-md);grid-template-columns:repeat(auto-fit,minmax(min(100%,24rem),1fr))}
+.lx-chart{position:relative;min-width:0}
+.lx-chart-main{min-height:330px}
+.lx-chart-sm{min-height:290px}
+.lx-legend{display:flex;flex-wrap:wrap;gap:var(--cds-gap-xs) var(--cds-gap-md);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-bottom:var(--cds-gap-xs)}
+.lx-legend span{display:inline-flex;align-items:center;gap:var(--cds-gap-xs)}
+.lx-sw{display:inline-block;width:.625rem;height:.625rem;border-radius:2px;flex:none}
+.lx-sw.line{height:2px;width:.875rem;border-radius:0}
+.lx-sw.dash{width:.875rem;height:0;border-radius:0;background:transparent}
+.lx-tick{fill:var(--color-fg-muted);font-size:var(--cds-font-size-caption);font-family:var(--font-anthropic-sans)}
+.lx-pct{fill:var(--color-fg-muted);font-size:var(--cds-font-size-caption);font-family:var(--font-anthropic-sans);font-variant-numeric:tabular-nums}
+.lx-tip{position:absolute;z-index:5;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);min-width:9rem;max-width:18rem}
+.lx-tip-h{color:var(--cds-text-secondary);margin-bottom:2px}
+.lx-tip-r{display:flex;align-items:center;gap:var(--cds-gap-xs);white-space:nowrap}
+.lx-tip-k{flex:1}
+.lx-tip-v{font-variant-numeric:tabular-nums;padding-left:var(--cds-gap-sm)}
+.lx-fail{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:inherit;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.lx-faildot{width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad);flex:none}
+.lx-scroll{overflow-x:auto}
+.lx-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.lx-table th{position:sticky;top:0;text-align:left;font-weight:var(--cds-font-weight-medium);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap;background:var(--color-panel)}
+.lx-table td{padding:var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);vertical-align:middle}
+.lx-table tr:last-child td{border-bottom:0}
+.lx-table .num{text-align:right;white-space:nowrap}
+.lx-table tr.sel td{background:var(--color-bg)}
+.lx-table tr.tot td{font-weight:var(--cds-font-weight-medium)}
+.lx-link{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--color-border-line);text-underline-offset:3px}
+.lx-cellbar{display:grid;gap:3px;justify-items:end}
+.lx-bar{height:4px;border-radius:2px;background:var(--cds-chart-muted);opacity:.55;min-width:2px}
+.lx-chip{display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap}
+.lx-chip i{width:.5rem;height:.5rem;border-radius:50%;background:currentColor;flex:none}
+.lx-chip.ok{color:var(--color-ok)}
+.lx-chip.delay{color:var(--color-warn)}
+.lx-chip.error{color:var(--color-bad)}
+.lx-chip span{color:var(--color-fg)}
+.lx-skel-row{min-height:5rem}
+.lx-fail.row{min-height:5rem}
+.lx-foot{display:grid;gap:var(--cds-gap-sm)}
+.lx-foot details{border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-sm) var(--cds-pad-md)}
+.lx-foot summary{cursor:pointer;font-weight:var(--cds-font-weight-medium)}
+.lx-foot dl{margin:var(--cds-gap-sm) 0 0;display:grid;gap:var(--cds-gap-xs)}
+.lx-foot dt{font-weight:var(--cds-font-weight-medium)}
+.lx-foot dd{margin:0;color:var(--color-fg-muted)}
+@container (max-width: 600px){.lx-hide-sm{display:none}}
+@container (max-width: 480px){.lx-hide-xs{display:none}.lx-table th,.lx-table td{padding-inline:var(--cds-pad-xs)}}
+</style>
+</head>
+<body>
+
+<div class="lx" id="lx-page">
+  <header class="lx-head" id="top">
+    <div class="lx-titlerow">
+      <h1 class="lx-title">Бизнес-метрики</h1>
+    </div>
+    <p class="lx-take" id="lx-take">
+      <span id="tk-lead">Выручка</span>: <span id="tk-rev" class="dash-skeleton" data-source="kpis" data-field="revenue">—</span><span id="tk-dwrap" hidden>, <span id="tk-delta" data-source="kpis" data-field="revenue_delta">—</span> к предыдущему периоду</span>.
+      <span id="tk-toprow" hidden>Быстрее всех растёт «<span id="tk-top" data-source="kpis" data-field="channel">—</span>»: <span id="tk-topd" data-source="kpis" data-field="revenue_delta">—</span>.</span>
+    </p>
+    <p class="lx-note">Компания «Северный ветер», товары для дома. Данные собраны из CRM, учётной системы, рекламных кабинетов и выгрузок маркетплейсов. Данные на <span id="asof-last" data-source="asof" data-row="0" data-field="as_of">—</span>, история с <span id="asof-first" data-source="asof" data-row="0" data-field="first_date">—</span>.</p>
+  </header>
+
+  <section class="lx-filters" id="filters" aria-label="Фильтры">
+    <div class="lx-fgroup"><span class="lx-flabel">Период</span><div class="lx-seg" id="lx-period" role="group" aria-label="Период"></div></div>
+    <div class="lx-fgroup"><span class="lx-flabel">Канал</span><div class="lx-seg" id="lx-channel" role="group" aria-label="Канал"></div></div>
+  </section>
+
+  <section id="kpi" class="lx-kpi" aria-label="Ключевые показатели"><div class="lx-tiles" id="lx-tiles">
+      <article class="lx-tile" id="tile-revenue">
+        <div class="lx-tile-top"><span class="lx-tile-name">Выручка</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-hint">сумма продаж за окно</div>
+        <div class="lx-num dash-skeleton" data-source="kpis" data-field="revenue">—</div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="revenue_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
+      </article>
+      <article class="lx-tile" id="tile-orders">
+        <div class="lx-tile-top"><span class="lx-tile-name">Заказы</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-hint">число оформленных заказов</div>
+        <div class="lx-num dash-skeleton" data-source="kpis" data-field="orders">—</div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="orders_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
+      </article>
+      <article class="lx-tile" id="tile-aov">
+        <div class="lx-tile-top"><span class="lx-tile-name">Средний чек</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-hint">выручка ÷ заказы</div>
+        <div class="lx-num dash-skeleton" data-source="kpis" data-field="aov">—</div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="aov_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
+      </article>
+      <article class="lx-tile" id="tile-margin">
+        <div class="lx-tile-top"><span class="lx-tile-name">Валовая маржа</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-hint">(выручка − себестоимость) ÷ выручка</div>
+        <div class="lx-num dash-skeleton" data-source="kpis" data-field="margin">—</div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="margin_delta_pp">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
+      </article>
+      <article class="lx-tile" id="tile-drr">
+        <div class="lx-tile-top"><span class="lx-tile-name">Доля рекламы</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-hint">расходы на рекламу ÷ выручка (ДРР)</div>
+        <div class="lx-num dash-skeleton" data-source="kpis" data-field="drr">—</div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="drr_delta_pp">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
+      </article>
+      <article class="lx-tile" id="tile-new">
+        <div class="lx-tile-top"><span class="lx-tile-name">Новые клиенты</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-hint">первая покупка в окне</div>
+        <div class="lx-num dash-skeleton" data-source="kpis" data-field="new_customers">—</div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="new_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
+      </article>
+    </div></section>
+
+  <section class="lx-card" id="trend">
+    <div class="lx-card-head">
+      <h2 class="lx-h">Выручка по дням</h2>
+      <p class="lx-note" id="trend-note">Сумма продаж за день; пунктир показывает предыдущий период такой же длины.</p>
+    </div>
+    <div class="lx-chart lx-chart-main dash-skeleton" id="chart-main" data-source="sales_daily"></div>
+  </section>
+
+  <div class="lx-grid2">
+    <section class="lx-card" id="plan">
+      <div class="lx-card-head">
+        <h2 class="lx-h">План и факт по месяцам</h2>
+        <p class="lx-note">Выручка выбранного канала против плана. Текущий месяц сравнивается с планом на прошедшие дни.</p>
+      </div>
+      <div class="lx-chart lx-chart-sm dash-skeleton" id="chart-plan" data-source="plan_fact"></div>
+    </section>
+    <section class="lx-card" id="mix">
+      <div class="lx-card-head">
+        <h2 class="lx-h">Выручка по каналам</h2>
+        <p class="lx-note" id="mix-note">Структура выручки за выбранный период; выбранный канал выделен.</p>
+      </div>
+      <div class="lx-chart lx-chart-sm dash-skeleton" id="chart-mix" data-source="sales_daily"></div>
+    </section>
+  </div>
+
+  <section class="lx-card" id="channels">
+    <div class="lx-card-head">
+      <h2 class="lx-h">Каналы продаж</h2>
+      <p class="lx-note">Нажмите на название канала, чтобы отфильтровать всю панель.</p>
+    </div>
+    <div class="lx-scroll">
+      <table class="lx-table" id="tbl-channels" data-source="kpis" data-row-key="k">
+        <thead><tr>
+          <th data-field="channel">Канал</th>
+          <th data-field="revenue" class="num">Выручка</th>
+          <th data-field="share" class="num lx-hide-xs">Доля</th>
+          <th data-field="orders" class="num lx-hide-sm">Заказы</th>
+          <th data-field="aov" class="num lx-hide-sm">Ср. чек</th>
+          <th data-field="margin" class="num">Маржа</th>
+          <th data-field="drr" class="num lx-hide-sm">ДРР</th>
+          <th data-field="conversion" class="num lx-hide-sm">Конверсия</th>
+          <th data-field="revenue_delta" class="num">Δ выручки</th>
+        </tr></thead>
+        <tbody><tr><td colspan="9"><div class="lx-skel-row dash-skeleton"></div></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="lx-card" id="products">
+    <div class="lx-card-head">
+      <h2 class="lx-h">Топ товаров</h2>
+      <p class="lx-note" id="prod-note">Восемь товаров с наибольшей выручкой за выбранный период и канал.</p>
+    </div>
+    <div class="lx-scroll">
+      <table class="lx-table" id="tbl-products" data-source="top_products" data-row-key="k">
+        <thead><tr>
+          <th data-field="name">Товар</th>
+          <th data-field="category" class="lx-hide-sm">Категория</th>
+          <th data-field="revenue" class="num">Выручка</th>
+          <th data-field="share" class="num lx-hide-xs">Доля</th>
+          <th data-field="units" class="num lx-hide-sm">Штук</th>
+          <th data-field="margin" class="num lx-hide-xs">Маржа</th>
+          <th data-field="revenue_delta" class="num">Δ выручки</th>
+        </tr></thead>
+        <tbody><tr><td colspan="7"><div class="lx-skel-row dash-skeleton"></div></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="lx-card" id="sources">
+    <div class="lx-card-head">
+      <h2 class="lx-h">Источники данных</h2>
+      <p class="lx-note">Откуда панель берёт цифры и когда данные обновлялись в последний раз (время UTC).</p>
+    </div>
+    <div class="lx-scroll">
+      <table class="lx-table" id="tbl-sources" data-source="pipeline" data-row-key="system">
+        <thead><tr>
+          <th data-field="system">Источник</th>
+          <th data-field="type" class="lx-hide-sm">Тип</th>
+          <th data-field="schedule" class="lx-hide-sm">Обновление</th>
+          <th data-field="last_sync">Обновлено</th>
+          <th data-field="status">Статус</th>
+          <th data-field="rows_loaded" class="num lx-hide-sm">Строк</th>
+          <th data-field="note" class="lx-hide-sm">Примечание</th>
+        </tr></thead>
+        <tbody><tr><td colspan="7"><div class="lx-skel-row dash-skeleton"></div></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="lx-foot" id="about">
+    <details>
+      <summary>Как считаются показатели</summary>
+      <dl>
+        <dt>Валовая маржа</dt><dd>(выручка − себестоимость) ÷ выручка.</dd>
+        <dt>Доля рекламы (ДРР)</dt><dd>расходы на рекламу ÷ выручка. Чем ниже, тем лучше.</dd>
+        <dt>Средний чек</dt><dd>выручка ÷ число заказов.</dd>
+        <dt>Конверсия</dt><dd>заказы ÷ посещения; считается только для интернет-магазина и маркетплейсов, у оптовых и розничных продаж посещений нет.</dd>
+        <dt>Сравнение с предыдущим периодом</dt><dd>берётся окно такой же длины, которое заканчивается перед выбранным. Для «Весь период» сравнения нет.</dd>
+        <dt>План на неполный месяц</dt><dd>полный план месяца, умноженный на долю прошедших дней.</dd>
+      </dl>
+    </details>
+    <p class="lx-note">Источники подключаются к CRM, учётной системе, рекламным кабинетам, API маркетплейсов, Excel и Google Таблицам.</p>
+  </footer>
+</div>
+
+<script>
+/* ==== минимальная замена фреймворка dash ==== */
+(function(){
+  const _raw = {}, _store = new Map(), _calcs = new Map(), _subs = [];
+  let _params = {period:'30', channel:'Все каналы'}, _ready = false;
+  function recompute(){
+    for (const [id, def] of _calcs){
+      const inputs = def.inputs.map(i => _raw[i]);
+      if (inputs.some(x => !x)){ _store.set(id, {status:'loading', data:null}); continue; }
+      try { _store.set(id, {status:'ok', data: def.fn.apply(null, inputs)}); }
+      catch(e){ console.error('calc', id, e); _store.set(id, {status:'error', data:null}); }
+    }
+  }
+  function emit(){ _subs.forEach(fn => fn()); }
+  window.dash = {
+    colors:['#C15F3C','#3C6E71','#8A5A44','#5B7DB1','#9A8C98','#6B8F71','#B5838D','#7F6A5A'],
+    calc(id, def){ _calcs.set(id, def); },
+    data(id){
+      if (_store.has(id)) return _store.get(id);
+      if (_raw[id]) return {status:'ok', data:_raw[id]};
+      return {status:'loading', data:null};
+    },
+    params(){ return _params; },
+    setParams(p){ _params = Object.assign({}, _params, p); emit(); },
+    onData(fn){ _subs.push(fn); if (_ready) queueMicrotask(fn); }
+  };
+  window.__dashBoot = function(raw){ Object.assign(_raw, raw); recompute(); _ready = true; emit(); };
+})();
+
+/* ==== генератор данных ==== */
+function genData(){
+  const CH = ['Интернет-магазин','Маркетплейсы','Розница','Опт'];
+  const P = [
+    ['SKU-01','Ваза керамическая «Волна»','Декор',2400],
+    ['SKU-02','Плед шерстяной «Тайга»','Текстиль',5400],
+    ['SKU-03','Настольная лампа «Янтарь»','Освещение',3200],
+    ['SKU-04','Набор свечей «Сосна»','Декор',1200],
+    ['SKU-05','Кружка «Утро» 350 мл','Посуда',890],
+    ['SKU-06','Поднос дубовый 40×25','Посуда',2100],
+    ['SKU-07','Корзина плетёная','Хранение',1600],
+    ['SKU-08','Полка настенная «Линия»','Мебель',4800],
+    ['SKU-09','Коврик придверный','Текстиль',990],
+    ['SKU-10','Аромадиффузор «Кедр»','Ароматы',1900],
+    ['SKU-11','Постер «Север» 30×40','Декор',1400],
+    ['SKU-12','Органайзер для мелочей','Хранение',750]
+  ];
+  let s = 20250531;
+  const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  const N = 400, END = Date.UTC(2025,4,31);
+  const cfg = {
+    'Интернет-магазин':{base:175000,g:0.0012,aov:4200,cogs:0.58,ad:0.14,conv:0.028,wk:0.22},
+    'Маркетплейсы':{base:235000,g:0.0021,aov:3100,cogs:0.63,ad:0.19,conv:0.041,wk:0.15},
+    'Розница':{base:88000,g:0.0004,aov:2600,cogs:0.55,ad:0.05,conv:0,wk:0.35},
+    'Опт':{base:155000,g:0.0006,aov:68000,cogs:0.68,ad:0.02,conv:0,wk:0.10}
+  };
+  const sales = [], prods = [];
+  for (let i = 0; i < N; i++){
+    const t = END - (N - 1 - i) * 86400000;
+    const date = new Date(t).toISOString().slice(0,10);
+    const dow = new Date(t).getUTCDay();
+    for (const ch of CH){
+      const c = cfg[ch];
+      let rev = c.base * Math.pow(1 + c.g, i);
+      rev *= 1 + c.wk * ((dow === 0 || dow === 6) ? 1 : 0) - c.wk * 0.35 * (dow === 1 ? 1 : 0);
+      rev *= 0.82 + rnd() * 0.36;
+      if (ch === 'Опт') rev *= (rnd() < 0.42 ? 1.9 : 0.62);
+      rev = Math.round(rev);
+      const orders = Math.max(1, Math.round(rev / (c.aov * (0.92 + rnd() * 0.16))));
+      sales.push({
+        date, channel: ch, revenue: rev, orders,
+        cogs: Math.round(rev * (c.cogs + (rnd() - 0.5) * 0.05)),
+        ad_spend: Math.round(rev * (c.ad + (rnd() - 0.5) * 0.04)),
+        new_customers: Math.max(0, Math.round(orders * (0.22 + rnd() * 0.2))),
+        sessions: c.conv ? Math.round(orders / (c.conv * (0.85 + rnd() * 0.3))) : 0
+      });
+      const k = 7 + Math.floor(rnd() * 5);
+      const pool = P.slice().sort(() => rnd() - 0.5).slice(0, k);
+      const ws = pool.map(() => 0.5 + rnd());
+      const sum = ws.reduce((a,b) => a + b, 0);
+      pool.forEach((p, j) => {
+        const pr = Math.round(rev * ws[j] / sum);
+        if (pr <= 0) return;
+        prods.push({
+          date, channel: ch, sku: p[0], name: p[1], category: p[2], revenue: pr,
+          units: Math.max(1, Math.round(pr / (p[3] * (0.85 + rnd() * 0.3)))),
+          cogs: Math.round(pr * (c.cogs + (rnd() - 0.5) * 0.08))
+        });
+      });
+    }
+  }
+  const mf = {};
+  for (const r of sales){ const k = r.date.slice(0,7) + '|' + r.channel; mf[k] = (mf[k] || 0) + r.revenue; }
+  const months = [...new Set(sales.map(r => r.date.slice(0,7)))];
+  const plan = [];
+  for (const m of months) for (const ch of CH){
+    const f = mf[m + '|' + ch] || 0;
+    plan.push({month: m, channel: ch, revenue_plan: Math.round(f * (0.94 + rnd() * 0.18))});
+  }
+  const pipeline = [
+    {system:'CRM (amoCRM)', type:'API', schedule:'каждые 15 минут', last_sync:'2025-05-31T18:45:00Z', status:'ok', rows_loaded:18422, note:'сделки и оплаты'},
+    {system:'1С:Управление торговлей', type:'Выгрузка', schedule:'раз в час', last_sync:'2025-05-31T18:10:00Z', status:'ok', rows_loaded:9310, note:'себестоимость и остатки'},
+    {system:'Яндекс.Директ', type:'API', schedule:'раз в 3 часа', last_sync:'2025-05-31T16:00:00Z', status:'delay', rows_loaded:2410, note:'расходы на рекламу, задержка 2 ч'},
+    {system:'Ozon Seller API', type:'API', schedule:'каждые 30 минут', last_sync:'2025-05-31T18:40:00Z', status:'ok', rows_loaded:6120, note:'заказы и выручка маркетплейса'},
+    {system:'Wildberries API', type:'API', schedule:'каждые 30 минут', last_sync:'2025-05-31T17:20:00Z', status:'error', rows_loaded:0, note:'ошибка авторизации, токен истёк'},
+    {system:'Google Таблицы', type:'Импорт', schedule:'раз в день', last_sync:'2025-05-31T06:00:00Z', status:'ok', rows_loaded:880, note:'ручные корректировки розницы'}
+  ];
+  return {sales_daily: sales, product_sales: prods, plan_monthly: plan, pipeline};
+}
+</script>
+
+<script>
+'use strict';
+const ALL = 'Все каналы';
+const PERIODS = [['30','30 дней'],['90','90 дней'],['180','180 дней'],['all','Весь период']];
+const WIN = {'30':'30 дней','90':'90 дней','180':'180 дней', all:'весь период'};
+const NB = ' ';
+const DAY = 86400000;
+const C = dash.colors;
+let ACCENT = C[0];
+
+dash.calc('asof', {
+  inputs:['sales_daily'], title:'Период данных', description:'Первая и последняя даты в продажах по дням.',
+  fn:(sales_daily) => {
+    const days = sales_daily.map(r => r.date.slice(0,10)).sort();
+    const first = days[0], last = days[days.length-1];
+    return [{as_of:last, first_date:first, days: Math.round((Date.parse(last) - Date.parse(first))/86400000)+1}];
+  }
+});
+
+dash.calc('kpis', {
+  inputs:['sales_daily'], title:'Показатели по периодам', description:'Выручка, заказы, чек, маржа, реклама и новые клиенты.',
+  fn:(sales_daily) => {
+    const DAY = 86400000, ALL = 'Все каналы';
+    const rows = sales_daily.map(r => ({d:r.date.slice(0,10), ch:r.channel, rev:+r.revenue, ord:+r.orders, cogs:+r.cogs, ad:+r.ad_spend, nw:+r.new_customers, ses:+r.sessions||0}));
+    const iso = t => new Date(t).toISOString().slice(0,10);
+    const last = rows.reduce((m,r) => (r.d>m?r.d:m), '');
+    const first = rows.reduce((m,r) => (r.d<m?r.d:m), last);
+    const endT = Date.parse(last), firstT = Date.parse(first);
+    const channels = [ALL, ...new Set(rows.map(r => r.ch))];
+    const agg = (from,to,ch) => rows.reduce((a,r) => {
+      if (r.d<from || r.d>to || (ch!==ALL && r.ch!==ch)) return a;
+      a.rev+=r.rev; a.ord+=r.ord; a.cogs+=r.cogs; a.ad+=r.ad; a.nw+=r.nw;
+      if (r.ses>0){ a.ses+=r.ses; a.ordS+=r.ord; }
+      return a;
+    }, {rev:0,ord:0,cogs:0,ad:0,nw:0,ses:0,ordS:0});
+    const rel = (c,p) => (p>0 ? c/p-1 : null);
+    const marg = a => (a.rev ? (a.rev-a.cogs)/a.rev : 0);
+    const drr = a => (a.rev ? a.ad/a.rev : 0);
+    const aov = a => (a.ord ? a.rev/a.ord : 0);
+    const out = [];
+    for (const p of ['30','90','180','all']){
+      const n = p==='all' ? 0 : +p;
+      const from = p==='all' ? first : iso(endT-(n-1)*DAY);
+      const hasPrev = p!=='all' && endT-(2*n-1)*DAY >= firstT;
+      const total = agg(from,last,ALL);
+      for (const ch of channels){
+        const c = agg(from,last,ch);
+        const q = hasPrev ? agg(iso(endT-(2*n-1)*DAY), iso(endT-n*DAY), ch) : null;
+        out.push({
+          k:p+'|'+ch, period:p, channel:ch,
+          revenue:c.rev, share: total.rev ? c.rev/total.rev : 0, orders:c.ord, aov:Math.round(aov(c)),
+          margin:marg(c), drr:drr(c), new_customers:c.nw, conversion: c.ses ? c.ordS/c.ses : null,
+          revenue_delta: q ? rel(c.rev,q.rev) : null, orders_delta: q ? rel(c.ord,q.ord) : null,
+          aov_delta: q ? rel(aov(c),aov(q)) : null,
+          margin_delta_pp: q ? (marg(c)-marg(q))*100 : null,
+          drr_delta_pp: q ? (drr(c)-drr(q))*100 : null,
+          new_delta: q ? rel(c.nw,q.nw) : null
+        });
+      }
+    }
+    return out;
+  }
+});
+
+dash.calc('top_products', {
+  inputs:['product_sales'], title:'Товары по периодам', description:'Выручка, доля, штуки, маржа и динамика каждого товара.',
+  fn:(product_sales) => {
+    const DAY = 86400000, ALL = 'Все каналы';
+    const rows = product_sales.map(r => ({d:r.date.slice(0,10), ch:r.channel, sku:r.sku, name:r.name, cat:r.category, rev:+r.revenue, u:+r.units, cogs:+r.cogs}));
+    const iso = t => new Date(t).toISOString().slice(0,10);
+    const last = rows.reduce((m,r) => (r.d>m?r.d:m), '');
+    const first = rows.reduce((m,r) => (r.d<m?r.d:m), last);
+    const endT = Date.parse(last), firstT = Date.parse(first);
+    const channels = [ALL, ...new Set(rows.map(r => r.ch))];
+    const skus = [...new Map(rows.map(r => [r.sku,r])).values()];
+    const agg = (from,to,ch) => {
+      const m = new Map();
+      for (const r of rows){
+        if (r.d<from || r.d>to || (ch!==ALL && r.ch!==ch)) continue;
+        const a = m.get(r.sku) || {rev:0,u:0,cogs:0};
+        a.rev+=r.rev; a.u+=r.u; a.cogs+=r.cogs;
+        m.set(r.sku, a);
+      }
+      return m;
+    };
+    const out = [];
+    for (const p of ['30','90','180','all']){
+      const n = p==='all' ? 0 : +p;
+      const from = p==='all' ? first : iso(endT-(n-1)*DAY);
+      const hasPrev = p!=='all' && endT-(2*n-1)*DAY >= firstT;
+      for (const ch of channels){
+        const cur = agg(from,last,ch);
+        const prev = hasPrev ? agg(iso(endT-(2*n-1)*DAY), iso(endT-n*DAY), ch) : null;
+        const total = [...cur.values()].reduce((s,a) => s+a.rev, 0);
+        for (const sk of skus){
+          const a = cur.get(sk.sku) || {rev:0,u:0,cogs:0};
+          const b = prev ? prev.get(sk.sku) : null;
+          out.push({
+            k:p+'|'+ch+'|'+sk.sku, period:p, channel:ch, sku:sk.sku, name:sk.name, category:sk.cat,
+            revenue:a.rev, share: total ? a.rev/total : 0, units:a.u,
+            margin: a.rev ? (a.rev-a.cogs)/a.rev : 0,
+            revenue_delta: b && b.rev>0 ? a.rev/b.rev-1 : null
+          });
+        }
+      }
+    }
+    return out;
+  }
+});
+
+dash.calc('plan_fact', {
+  inputs:['sales_daily','plan_monthly'], title:'План и факт', description:'Выручка по месяцам против плана.',
+  fn:(sales_daily, plan_monthly) => {
+    const ALL = 'Все каналы';
+    const last = sales_daily.reduce((m,r) => (r.date>m?r.date:m), '').slice(0,10);
+    const lastMonth = last.slice(0,7), elapsed = +last.slice(8,10);
+    const dim = ym => new Date(Date.UTC(+ym.slice(0,4), +ym.slice(5,7), 0)).getUTCDate();
+    const channels = [ALL, ...new Set(sales_daily.map(r => r.channel))];
+    const months = [...new Set(plan_monthly.map(r => r.month))].sort();
+    const fact = new Map(), pl = new Map();
+    for (const r of sales_daily) for (const ch of [ALL, r.channel]){
+      const key = r.date.slice(0,7)+'|'+ch;
+      fact.set(key, (fact.get(key)||0) + +r.revenue);
+    }
+    for (const r of plan_monthly) for (const ch of [ALL, r.channel]){
+      const key = r.month+'|'+ch;
+      pl.set(key, (pl.get(key)||0) + +r.revenue_plan);
+    }
+    const out = [];
+    for (const ch of channels) for (const m of months){
+      const f = fact.get(m+'|'+ch) || 0;
+      const full = pl.get(m+'|'+ch) || 0;
+      const partial = m === lastMonth;
+      const toDate = partial ? full*elapsed/dim(m) : full;
+      out.push({k:ch+'|'+m, channel:ch, month:m, fact:f, plan:Math.round(toDate), pct: toDate ? f/toDate : 0, partial: partial?1:0});
+    }
+    return out;
+  }
+});
+
+const ru = d3.formatLocale({decimal:',', thousands:NB, grouping:[3], currency:['',NB+'₽']});
+const fInt = ru.format(',.0f'), f1 = ru.format(',.1f'), f2 = ru.format(',.2f');
+const fP0 = ru.format('.0%'), fP1 = ru.format('.1%');
+const MG = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const MN = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const p2 = n => String(n).padStart(2,'0');
+const num = x => { const n = Number(x); return Number.isFinite(n) ? n : 0; };
+const day0 = s => Date.parse(String(s).slice(0,10));
+const fmtDay = t => { const d = new Date(t); return d.getUTCDate() + NB + MG[d.getUTCMonth()]; };
+const fmtDayY = t => fmtDay(t) + NB + new Date(t).getUTCFullYear();
+const fmtMon = t => { const d = new Date(t); return MN[d.getUTCMonth()] + (d.getUTCMonth()===0 ? NB + String(d.getUTCFullYear()).slice(2) : ''); };
+const fmtMonY = t => { const d = new Date(t); return MN[d.getUTCMonth()] + NB + d.getUTCFullYear(); };
+const fmtTs = s => { const d = new Date(s); return Number.isNaN(+d) ? String(s) : p2(d.getUTCDate())+'.'+p2(d.getUTCMonth()+1)+' '+p2(d.getUTCHours())+':'+p2(d.getUTCMinutes()); };
+const money = v => {
+  const a = Math.abs(v);
+  if (a >= 1e9) return f2(v/1e9) + NB + 'млрд' + NB + '₽';
+  if (a >= 1e6) return f1(v/1e6) + NB + 'млн' + NB + '₽';
+  if (a >= 1e3) return fInt(Math.round(v/1e3)) + NB + 'тыс.' + NB + '₽';
+  return fInt(v) + NB + '₽';
+};
+const rub = v => fInt(v) + NB + '₽';
+const fMil = m => (Math.abs(m - Math.round(m)) < 1e-9 ? fInt(Math.round(m)) : f1(m));
+const axisMoney = v => (v === 0 ? '0' : Math.abs(v) >= 1e6 ? fMil(v/1e6) + NB + 'млн' : fInt(Math.round(v/1e3)) + NB + 'тыс.');
+const sgn = v => (v > 0 ? '+' : v < 0 ? '-' : '');
+const rel = v => (v == null ? '—' : sgn(Math.round(v*1000)/1000) + fP1(Math.abs(v)));
+const pp = v => (v == null ? '—' : sgn(Math.round(v*10)/10) + f1(Math.abs(v)) + NB + 'п.п.');
+const deltaClass = (v, low, eps = 0.0005) => {
+  if (v == null || Math.abs(v) < eps) return 'flat';
+  return (low ? v < 0 : v > 0) ? 'good' : 'bad';
+};
+
+const KPIS = [
+  {key:'revenue', name:'Выручка', field:'revenue', dfield:'revenue_delta', fmt:money, kind:'rel', hint:'сумма продаж за окно'},
+  {key:'orders', name:'Заказы', field:'orders', dfield:'orders_delta', fmt:fInt, kind:'rel', hint:'число оформленных заказов'},
+  {key:'aov', name:'Средний чек', field:'aov', dfield:'aov_delta', fmt:rub, kind:'rel', hint:'выручка ÷ заказы'},
+  {key:'margin', name:'Валовая маржа', field:'margin', dfield:'margin_delta_pp', fmt:fP1, kind:'pp', hint:'(выручка − себестоимость) ÷ выручка'},
+  {key:'drr', name:'Доля рекламы', field:'drr', dfield:'drr_delta_pp', fmt:fP1, kind:'pp', low:true, hint:'расходы на рекламу ÷ выручка (ДРР)'},
+  {key:'new', name:'Новые клиенты', field:'new_customers', dfield:'new_delta', fmt:fInt, kind:'rel', hint:'первая покупка в окне'}
+];
+
+const el = (tag, cls, text) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+};
+const rowsOf = id => { const s = dash.data(id); return s.status === 'ok' ? s.data : null; };
+const stateOf = (...ids) => {
+  const ss = ids.map(id => dash.data(id).status);
+  if (ss.every(s => s === 'ok')) return 'ok';
+  return ss.some(s => s === 'loading') ? 'loading' : 'error';
+};
+const prep = host => { host.replaceChildren(); host.classList.remove('dash-skeleton'); };
+const failBox = host => {
+  prep(host);
+  const f = el('div','lx-fail');
+  f.append(el('i','lx-faildot'), el('span',null,'Не удалось загрузить'));
+  host.appendChild(f);
+};
+const failRow = (sel, cols) => {
+  const tb = document.querySelector(sel + ' tbody');
+  const tr = el('tr'), td = el('td');
+  td.colSpan = cols;
+  const f = el('div','lx-fail row');
+  f.append(el('i','lx-faildot'), el('span',null,'Не удалось загрузить'));
+  td.appendChild(f); tr.appendChild(td); tb.replaceChildren(tr);
+};
+const failTiles = () => {
+  for (const k of KPIS){
+    const root = document.getElementById('tile-' + k.key);
+    for (const e of root.querySelectorAll('.lx-num, .lx-delta')){ e.classList.remove('dash-skeleton'); e.textContent = '—'; }
+  }
+};
+const legend = items => {
+  const l = el('div','lx-legend');
+  for (const it of items){
+    const s = el('span');
+    const sw = el('i','lx-sw' + (it.line?' line':'') + (it.dash?' dash':''));
+    if (it.dash) sw.style.borderTop = '2px dashed ' + it.color; else sw.style.background = it.color;
+    s.append(sw, document.createTextNode(it.name));
+    l.appendChild(s);
+  }
+  return l;
+};
+const textW = (svg, str) => {
+  const t = svg.append('text').attr('class','lx-tick').text(str);
+  const w = t.node().getComputedTextLength();
+  t.remove();
+  return w;
+};
+const placeLabels = (svg, items, y, minX, maxX) => {
+  const cand = items.map(it => ({...it, w: textW(svg, it.text)}));
+  const placed = cand.filter(c => c.must);
+  const free = a => placed.every(b => a.x + a.w/2 + 8 <= b.x - b.w/2 || b.x + b.w/2 + 8 <= a.x - a.w/2);
+  for (const c of cand) if (!c.must && free(c)) placed.push(c);
+  for (const c of placed){
+    let x = c.x, anchor = 'middle';
+    if (x - c.w/2 < minX){ x = minX; anchor = 'start'; }
+    else if (x + c.w/2 > maxX){ x = maxX; anchor = 'end'; }
+    svg.append('text').attr('class','lx-tick').attr('x',x).attr('y',y).attr('text-anchor',anchor).text(c.text);
+  }
+};
+const mkSvg = (host, w, h, label) => d3.select(host).append('svg').attr('width','100%').attr('viewBox','0 0 '+w+' '+h).attr('role','img').attr('aria-label',label).style('display','block');
+const tipBox = host => { const t = el('div','lx-tip'); t.hidden = true; host.appendChild(t); return t; };
+const tipFill = (t, head, rows) => {
+  t.replaceChildren();
+  t.appendChild(el('div','lx-tip-h', head));
+  for (const r of rows){
+    const d = el('div','lx-tip-r');
+    if (r.color){ const s = el('i','lx-sw'); s.style.background = r.color; d.appendChild(s); }
+    d.append(el('span','lx-tip-k', r.k), el('span','lx-tip-v', r.v));
+    t.appendChild(d);
+  }
+};
+const tipPlace = (host, t, node, px, py) => {
+  t.hidden = false;
+  const top0 = node.getBoundingClientRect().top - host.getBoundingClientRect().top;
+  const hw = host.clientWidth, tw = t.offsetWidth, th = t.offsetHeight;
+  let left = px + 14;
+  if (left + tw > hw - 4) left = px - tw - 14;
+  if (left < 4) left = 4;
+  let top = top0 + py - th - 10;
+  if (top < top0) top = top0 + py + 14;
+  t.style.left = left + 'px';
+  t.style.top = top + 'px';
+};
+
+const parseSales = rows => rows.map(r => ({d:day0(r.date), ch:r.channel, rev:num(r.revenue), ord:num(r.orders), cogs:num(r.cogs), ad:num(r.ad_spend), nw:num(r.new_customers)}));
+
+function buildSeries(parsed, channel, period){
+  let first = Infinity, last = -Infinity;
+  for (const r of parsed){ if (r.d < first) first = r.d; if (r.d > last) last = r.d; }
+  const n = period === 'all' ? Math.round((last-first)/DAY)+1 : Number(period);
+  const from = last - (n-1)*DAY;
+  const mk = () => ({rev:new Array(n).fill(0), ord:new Array(n).fill(0), cogs:new Array(n).fill(0), ad:new Array(n).fill(0), nw:new Array(n).fill(0)});
+  const cur = mk();
+  const prev = period !== 'all' && from - n*DAY >= first ? mk() : null;
+  const add = (t, r) => { t.rev[r.i]+=r.rev; t.ord[r.i]+=r.ord; t.cogs[r.i]+=r.cogs; t.ad[r.i]+=r.ad; t.nw[r.i]+=r.nw; };
+  for (const r of parsed){
+    if (channel !== ALL && r.ch !== channel) continue;
+    const i = Math.round((r.d - from)/DAY);
+    if (i >= 0 && i < n) add(cur, {...r, i});
+    else if (prev){
+      const j = Math.round((r.d - (from - n*DAY))/DAY);
+      if (j >= 0 && j < n) add(prev, {...r, i:j});
+    }
+  }
+  const days = Array.from({length:n}, (_,i) => from + i*DAY);
+  return {n, days, cur, prev, from, last, first};
+}
+
+const roll = a => a.map((_,i) => { let s = 0; for (let k = Math.max(0,i-6); k <= i; k++) s += a[k]; return s; });
+const rollAvg = a => roll(a).map((v,i) => v/Math.min(7,i+1));
+function sparkValues(key, c){
+  if (key === 'revenue') return rollAvg(c.rev);
+  if (key === 'orders') return rollAvg(c.ord);
+  if (key === 'new') return rollAvg(c.nw);
+  const r = roll(c.rev);
+  if (key === 'aov'){ const o = roll(c.ord); return r.map((v,i) => v ? v/o[i] : 0); }
+  if (key === 'margin'){ const g = roll(c.cogs); return r.map((v,i) => v ? (v-g[i])/v : 0); }
+  const a = roll(c.ad);
+  return r.map((v,i) => v ? a[i]/v : 0);
+}
+
+function drawSpark(host, vals){
+  prep(host);
+  const w = Math.max(80, host.clientWidth || 160), h = 36;
+  const svg = mkSvg(host, w, h, 'Тренд').attr('aria-hidden','true');
+  const x = d3.scaleLinear([0, Math.max(1, vals.length-1)], [3, w-5]);
+  const lo = d3.min(vals), hi = d3.max(vals), pad = (hi-lo)*0.15 || 1;
+  const y = d3.scaleLinear([lo-pad, hi+pad], [h-4, 4]);
+  svg.append('path').attr('d', d3.line().x((_,i) => x(i)).y(v => y(v))(vals)).attr('fill','none').style('stroke', ACCENT).attr('stroke-width',1.75).attr('stroke-linecap','round').attr('stroke-linejoin','round');
+  const li = vals.length-1;
+  svg.append('circle').attr('cx', x(li)).attr('cy', y(vals[li])).attr('r',3).style('fill', ACCENT).style('stroke','var(--color-panel)').attr('stroke-width',2);
+}
+
+function drawMain(host, S, channel){
+  prep(host);
+  const hasPrev = !!S.prev;
+  const items = [{name: channel === ALL ? 'Выручка, все каналы' : 'Выручка: ' + channel, color: ACCENT}];
+  if (hasPrev) items.push({name:'Предыдущие ' + S.n + ' дн.', color:'var(--cds-chart-muted)', dash:true});
+  host.appendChild(legend(items));
+  const w = Math.max(260, host.clientWidth || 640), h = 300;
+  const svg = mkSvg(host, w, h, 'Выручка по дням');
+  const cur = S.cur.rev, prv = hasPrev ? S.prev.rev : [];
+  const y = d3.scaleLinear([0, d3.max(cur.concat(prv)) || 1], [h-28, 12]).nice(4);
+  const yt = y.ticks(4);
+  const ml = Math.ceil(d3.max(yt, t => textW(svg, axisMoney(t)))) + 12, mr = 12;
+  const x = d3.scaleUtc([new Date(S.days[0]), new Date(S.days[S.n-1])], [ml, w-mr]);
+  const px = i => x(new Date(S.days[i]));
+  for (const t of yt){
+    svg.append('line').attr('x1',ml).attr('x2',w-mr).attr('y1',y(t)).attr('y2',y(t)).style('stroke', t === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)').attr('stroke-width',1);
+    svg.append('text').attr('class','lx-tick').attr('x',ml-8).attr('y',y(t)).attr('dy','0.32em').attr('text-anchor','end').text(axisMoney(t));
+  }
+  const plotW = w-ml-mr, pxDay = plotW/Math.max(1, S.n-1);
+  const ticks = [];
+  if (S.n <= 100){
+    const k = [1,2,3,5,7,10,14].find(c => c*pxDay >= 62) || 14;
+    for (let i = S.n-1; i >= 0; i -= k) ticks.unshift({x:px(i), text:fmtDay(S.days[i]), must: i === S.n-1});
+  } else {
+    const mm = [1,2,3,6].find(c => c*30.4*pxDay >= 54) || 6;
+    x.ticks(d3.utcMonth.every(mm)).forEach((d,i) => ticks.push({x:x(d), text:fmtMon(d.getTime()), must: i === 0 || d.getUTCMonth() === 0}));
+  }
+  placeLabels(svg, ticks, h-8, ml, w-2);
+  const gid = 'lx-g-' + Math.random().toString(36).slice(2,8);
+  const grad = svg.append('defs').append('linearGradient').attr('id',gid).attr('x1',0).attr('x2',0).attr('y1',0).attr('y2',1);
+  [[0,0.26],[0.25,0.16],[0.5,0.08],[0.75,0.03],[1,0]].forEach(([o,a]) => grad.append('stop').attr('offset',o).style('stop-color',ACCENT).style('stop-opacity',a));
+  svg.append('path').attr('d', d3.area().x((_,i) => px(i)).y0(y(0)).y1(v => y(v))(cur)).attr('fill','url(#'+gid+')');
+  if (hasPrev) svg.append('path').attr('d', d3.line().x((_,i) => px(i)).y(v => y(v))(prv)).attr('fill','none').style('stroke','var(--cds-chart-muted)').attr('stroke-width',1.75).attr('stroke-dasharray','4 4');
+  svg.append('path').attr('d', d3.line().x((_,i) => px(i)).y(v => y(v))(cur)).attr('fill','none').style('stroke',ACCENT).attr('stroke-width',2).attr('stroke-linecap','round').attr('stroke-linejoin','round');
+  const li = S.n-1;
+  svg.append('circle').attr('cx',px(li)).attr('cy',y(cur[li])).attr('r',3.5).style('fill',ACCENT).style('stroke','var(--color-panel)').attr('stroke-width',2);
+  const rule = svg.append('line').attr('y1',12).attr('y2',h-28).style('stroke','var(--cds-chart-reference)').attr('stroke-width',1).style('display','none');
+  const dotC = svg.append('circle').attr('r',4).style('fill',ACCENT).style('stroke','var(--color-panel)').attr('stroke-width',2).style('display','none');
+  const dotP = hasPrev ? svg.append('circle').attr('r',3.5).style('fill','var(--cds-chart-muted)').style('stroke','var(--color-panel)').attr('stroke-width',2).style('display','none') : null;
+  const tip = tipBox(host);
+  const node = svg.node();
+  svg.append('rect').attr('x',ml).attr('y',0).attr('width',w-ml-mr).attr('height',h-28).attr('fill','transparent').style('touch-action','pan-y')
+    .on('pointermove', ev => {
+      const t = x.invert(d3.pointer(ev, node)[0]).getTime();
+      const i = Math.max(0, Math.min(S.n-1, Math.round((t - S.days[0])/DAY)));
+      const X = px(i);
+      rule.attr('x1',X).attr('x2',X).style('display',null);
+      dotC.attr('cx',X).attr('cy',y(cur[i])).style('display',null);
+      const rows = [{color:ACCENT, k:'Выручка', v:money(cur[i])}];
+      if (hasPrev){
+        dotP.attr('cx',X).attr('cy',y(prv[i])).style('display',null);
+        rows.push({color:'var(--cds-chart-muted)', k:'Было ' + fmtDay(S.days[i] - S.n*DAY), v:money(prv[i])});
+      }
+      tipFill(tip, fmtDayY(S.days[i]), rows);
+      tipPlace(host, tip, node, X, y(cur[i]));
+    })
+    .on('pointerleave', () => { rule.style('display','none'); dotC.style('display','none'); if (dotP) dotP.style('display','none'); tip.hidden = true; });
+}
+
+function drawPlan(host, rows, channel){
+  prep(host);
+  const data = rows.filter(r => r.channel === channel).sort((a,b) => (a.month < b.month ? -1 : 1));
+  host.appendChild(legend([
+    {name:'Факт не ниже плана', color:ACCENT},
+    {name:'Факт ниже плана', color:'var(--cds-chart-status-critical)'},
+    {name:'План', color:'var(--cds-chart-reference)', line:true}
+  ]));
+  const w = Math.max(260, host.clientWidth || 420), h = 260, pb = h-40;
+  const svg = mkSvg(host, w, h, 'План и факт по месяцам');
+  const y = d3.scaleLinear([0, d3.max(data, r => Math.max(r.fact,r.plan)) || 1], [pb,16]).nice(4);
+  const yt = y.ticks(4);
+  const ml = Math.ceil(d3.max(yt, t => textW(svg, axisMoney(t)))) + 12;
+  const x = d3.scaleBand(data.map(r => r.month), [ml, w-8]).padding(0.25);
+  const bw = x.bandwidth();
+  const mt = m => Date.UTC(+m.slice(0,4), +m.slice(5,7)-1, 1);
+  for (const t of yt){
+    svg.append('line').attr('x1',ml).attr('x2',w-8).attr('y1',y(t)).attr('y2',y(t)).style('stroke', t === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)').attr('stroke-width',1);
+    svg.append('text').attr('class','lx-tick').attr('x',ml-8).attr('y',y(t)).attr('dy','0.32em').attr('text-anchor','end').text(axisMoney(t));
+  }
+  const showPct = x.step() >= 38;
+  const band = svg.append('rect').attr('y',6).attr('height',pb-6).attr('rx',4).style('fill','var(--cds-chart-grid)').style('opacity',0.5).style('display','none');
+  data.forEach(r => {
+    const x0 = x(r.month);
+    svg.append('rect').attr('x',x0).attr('y',y(r.fact)).attr('width',bw).attr('height',Math.max(0, y(0)-y(r.fact))).attr('rx',Math.min(4,bw/2))
+      .style('fill', r.pct >= 1 ? ACCENT : 'var(--cds-chart-status-critical)').style('opacity', r.partial ? 0.55 : 1);
+    svg.append('line').attr('x1',x0-3).attr('x2',x0+bw+3).attr('y1',y(r.plan)).attr('y2',y(r.plan)).style('stroke','var(--cds-chart-reference)').attr('stroke-width',2);
+    if (showPct) svg.append('text').attr('class','lx-pct').attr('x',x0+bw/2).attr('y',y(Math.max(r.fact,r.plan))-6).attr('text-anchor','middle').text(fP0(r.pct));
+  });
+  placeLabels(svg, data.map((r,i) => ({x:x(r.month)+bw/2, text:MN[+r.month.slice(5,7)-1], must: i === 0 || i === data.length-1})), h-22, ml-4, w-2);
+  data.forEach((r,i) => { if (i === 0 || r.month.endsWith('-01')) svg.append('text').attr('class','lx-tick').attr('x',x(r.month)).attr('y',h-6).attr('text-anchor','start').text(r.month.slice(0,4)); });
+  const tip = tipBox(host);
+  const node = svg.node();
+  data.forEach(r => {
+    const x0 = x(r.month) - (x.step()-bw)/2;
+    svg.append('rect').attr('x',x0).attr('y',0).attr('width',x.step()).attr('height',pb).attr('fill','transparent').style('touch-action','pan-y')
+      .on('pointermove', () => {
+        band.attr('x',x0).attr('width',x.step()).style('display',null);
+        tipFill(tip, fmtMonY(mt(r.month)) + (r.partial ? ' (месяц идёт)' : ''), [
+          {color: r.pct >= 1 ? ACCENT : 'var(--cds-chart-status-critical)', k:'Факт', v:money(r.fact)},
+          {k: r.partial ? 'План на прошедшие дни' : 'План', v:money(r.plan)},
+          {k:'Выполнение', v:fP0(r.pct)}
+        ]);
+        tipPlace(host, tip, node, x(r.month)+bw/2, y(Math.max(r.fact,r.plan)));
+      })
+      .on('pointerleave', () => { band.style('display','none'); tip.hidden = true; });
+  });
+}
+
+function drawMix(host, S, parsed, period, channel){
+  prep(host);
+  const chs = [...new Set(parsed.map(r => r.ch))];
+  host.appendChild(legend(chs.map((c,i) => ({name:c, color:C[i]}))));
+  const mode = period === '30' ? 'day' : period === 'all' ? 'month' : 'week';
+  const map = new Map();
+  const dayB = new Array(S.n);
+  for (let i = 0; i < S.n; i++){
+    const t = S.days[i], d = new Date(t);
+    const key = mode === 'day' ? i : mode === 'week' ? Math.floor((S.n-1-i)/7) : d.getUTCFullYear()*12 + d.getUTCMonth();
+    let b = map.get(key);
+    if (!b){ b = {from:t, to:t, days:0, vals:{}}; map.set(key, b); }
+    b.to = t; b.days++; dayB[i] = b;
+  }
+  for (const r of parsed){
+    const i = Math.round((r.d - S.from)/DAY);
+    if (i >= 0 && i < S.n){ const b = dayB[i]; b.vals[r.ch] = (b.vals[r.ch]||0) + r.rev; }
+  }
+  const bs = [...map.values()];
+  bs.forEach(b => { b.total = chs.reduce((s,c) => s + (b.vals[c]||0), 0); });
+  const stack = d3.stack().keys(chs).value((b,k) => b.vals[k]||0)(bs);
+  const w = Math.max(260, host.clientWidth || 420), h = 260, pb = h-40;
+  const svg = mkSvg(host, w, h, 'Выручка по каналам');
+  const y = d3.scaleLinear([0, d3.max(bs, b => b.total) || 1], [pb,12]).nice(4);
+  const yt = y.ticks(4);
+  const ml = Math.ceil(d3.max(yt, t => textW(svg, axisMoney(t)))) + 12;
+  const x = d3.scaleBand(d3.range(bs.length), [ml, w-8]).padding(0.2);
+  const bw = x.bandwidth();
+  for (const t of yt){
+    svg.append('line').attr('x1',ml).attr('x2',w-8).attr('y1',y(t)).attr('y2',y(t)).style('stroke', t === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)').attr('stroke-width',1);
+    svg.append('text').attr('class','lx-tick').attr('x',ml-8).attr('y',y(t)).attr('dy','0.32em').attr('text-anchor','end').text(axisMoney(t));
+  }
+  stack.forEach((layer, ci) => {
+    layer.forEach((seg, bi) => {
+      const hh = y(seg[0]) - y(seg[1]);
+      if (hh <= 0) return;
+      svg.append('rect').attr('x',x(bi)).attr('y',y(seg[1])).attr('width',bw).attr('height',Math.max(0,hh-2)).attr('rx',Math.min(2,bw/2))
+        .style('fill', C[ci]).style('opacity', channel === ALL || chs[ci] === channel ? 1 : 0.3);
+    });
+  });
+  const dim = t => { const d = new Date(t); return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth()+1, 0)).getUTCDate(); };
+  const label = b => (mode === 'month' ? MN[new Date(b.from).getUTCMonth()] : fmtDay(b.from));
+  const head = b => {
+    if (mode === 'day') return fmtDayY(b.from);
+    if (mode === 'month') return fmtMonY(b.from) + (b.days < dim(b.from) ? ' (неполный месяц)' : '');
+    return fmtDay(b.from) + ' – ' + fmtDay(b.to) + (b.days < 7 ? ' (неполная неделя)' : '');
+  };
+  placeLabels(svg, bs.map((b,i) => ({x:x(i)+bw/2, text:label(b), must: i === 0 || i === bs.length-1})), h-22, ml-4, w-2);
+  if (mode === 'month') bs.forEach((b,i) => { if (i === 0 || new Date(b.from).getUTCMonth() === 0) svg.append('text').attr('class','lx-tick').attr('x',x(i)).attr('y',h-6).attr('text-anchor','start').text(String(new Date(b.from).getUTCFullYear())); });
+  const band = svg.append('rect').attr('y',6).attr('height',pb-6).attr('rx',4).style('fill','var(--cds-chart-grid)').style('opacity',0.5).style('display','none');
+  const tip = tipBox(host);
+  const node = svg.node();
+  bs.forEach((b,i) => {
+    const x0 = x(i) - (x.step()-bw)/2;
+    svg.append('rect').attr('x',x0).attr('y',0).attr('width',x.step()).attr('height',pb).attr('fill','transparent').style('touch-action','pan-y')
+      .on('pointermove', () => {
+        band.attr('x',x0).attr('width',x.step()).style('display',null);
+        const rows = chs.map((c,ci) => ({color:C[ci], k:c, v:money(b.vals[c]||0)})).reverse();
+        rows.push({k:'Всего', v:money(b.total)});
+        tipFill(tip, head(b), rows);
+        tipPlace(host, tip, node, x(i)+bw/2, y(b.total));
+      })
+      .on('pointerleave', () => { band.style('display','none'); tip.hidden = true; });
+  });
+}
+
+function cell(tr, text, cls){ const td = el('td', cls, text); tr.appendChild(td); return td; }
+function barCell(tr, text, frac, cls){
+  const td = el('td','num' + (cls ? ' '+cls : ''));
+  const box = el('div','lx-cellbar');
+  box.appendChild(el('span', null, text));
+  const bar = el('div','lx-bar');
+  bar.style.width = Math.max(2, Math.round(Math.min(1, Math.max(0, frac))*72)) + 'px';
+  box.appendChild(bar);
+  td.appendChild(box);
+  tr.appendChild(td);
+}
+
+function drawChannels(kp, period, channel){
+  const tb = document.querySelector('#tbl-channels tbody');
+  tb.replaceChildren();
+  const rows = kp.filter(r => r.period === period);
+  const parts = rows.filter(r => r.channel !== ALL).sort((a,b) => b.revenue - a.revenue);
+  const total = rows.find(r => r.channel === ALL);
+  const maxShare = d3.max(parts, r => r.share) || 1;
+  for (const r of total ? parts.concat([total]) : parts){
+    const tr = el('tr', (r.channel === channel ? 'sel ' : '') + (r.channel === ALL ? 'tot' : ''));
+    tr.setAttribute('data-key', r.k);
+    const td = el('td');
+    const b = el('button','lx-link', r.channel);
+    b.type = 'button';
+    b.addEventListener('click', () => dash.setParams({channel:r.channel}));
+    td.appendChild(b);
+    tr.appendChild(td);
+    cell(tr, money(r.revenue), 'num');
+    barCell(tr, fP1(r.share), r.channel === ALL ? 1 : r.share/maxShare, 'lx-hide-xs');
+    cell(tr, fInt(r.orders), 'num lx-hide-sm');
+    cell(tr, rub(r.aov), 'num lx-hide-sm');
+    cell(tr, fP1(r.margin), 'num');
+    cell(tr, fP1(r.drr), 'num lx-hide-sm');
+    cell(tr, r.conversion == null ? '—' : fP1(r.conversion), 'num lx-hide-sm');
+    const d = cell(tr, rel(r.revenue_delta), 'num');
+    d.classList.add('lx-delta', deltaClass(r.revenue_delta, false));
+    tb.appendChild(tr);
+  }
+}
+
+function drawProducts(tp, period, channel){
+  const tb = document.querySelector('#tbl-products tbody');
+  tb.replaceChildren();
+  const rows = tp.filter(r => r.period === period && r.channel === channel).sort((a,b) => b.revenue - a.revenue).slice(0,8);
+  const maxRev = d3.max(rows, r => r.revenue) || 1;
+  for (const r of rows){
+    const tr = el('tr');
+    tr.setAttribute('data-key', r.k);
+    cell(tr, r.name);
+    cell(tr, r.category, 'lx-hide-sm');
+    cell(tr, money(r.revenue), 'num');
+    barCell(tr, fP1(r.share), r.revenue/maxRev, 'lx-hide-xs');
+    cell(tr, fInt(r.units), 'num lx-hide-sm');
+    cell(tr, fP1(r.margin), 'num lx-hide-xs');
+    const d = cell(tr, rel(r.revenue_delta), 'num');
+    d.classList.add('lx-delta', deltaClass(r.revenue_delta, false));
+    tb.appendChild(tr);
+  }
+}
+
+const STATUS = {ok:'Работает', delay:'Задержка', error:'Ошибка'};
+function drawSources(rows){
+  const tb = document.querySelector('#tbl-sources tbody');
+  tb.replaceChildren();
+  for (const r of rows){
+    const tr = el('tr');
+    cell(tr, r.system);
+    cell(tr, r.type, 'lx-hide-sm');
+    cell(tr, r.schedule, 'lx-hide-sm');
+    cell(tr, fmtTs(r.last_sync));
+    const td = el('td');
+    const chip = el('span','lx-chip ' + (STATUS[r.status] ? r.status : 'error'));
+    chip.append(el('i'), el('span', null, STATUS[r.status] || r.status));
+    td.appendChild(chip);
+    tr.appendChild(td);
+    cell(tr, fInt(num(r.rows_loaded)), 'num lx-hide-sm');
+    cell(tr, r.note, 'lx-hide-sm');
+    tb.appendChild(tr);
+  }
+}
+
+function renderControls(period, channel, salesRows){
+  const ph = document.getElementById('lx-period');
+  if (!ph.children.length){
+    for (const [v,label] of PERIODS){
+      const b = el('button', null, label);
+      b.type = 'button'; b.dataset.v = v;
+      b.addEventListener('click', () => dash.setParams({period:v}));
+      ph.appendChild(b);
+    }
+  }
+  for (const b of ph.children) b.setAttribute('aria-pressed', String(b.dataset.v === period));
+  const ch = document.getElementById('lx-channel');
+  const names = salesRows ? [ALL, ...new Set(salesRows.map(r => r.channel))] : [ALL];
+  if (ch.children.length !== names.length){
+    ch.replaceChildren();
+    for (const name of names){
+      const b = el('button', null, name);
+      b.type = 'button'; b.dataset.v = name;
+      b.addEventListener('click', () => dash.setParams({channel:name}));
+      ch.appendChild(b);
+    }
+  }
+  for (const b of ch.children) b.setAttribute('aria-pressed', String(b.dataset.v === channel));
+}
+
+function paintTiles(kp, period, channel){
+  const key = period + '|' + channel;
+  const r = kp.find(x => x.k === key);
+  for (const k of KPIS){
+    const root = document.getElementById('tile-' + k.key);
+    const numEl = root.querySelector('.lx-num');
+    const dl = root.querySelector('.lx-delta');
+    root.querySelector('[data-win]').textContent = WIN[period];
+    root.querySelector('.lx-vs').textContent = period === 'all' ? 'сравнения нет' : 'к пред. периоду';
+    numEl.setAttribute('data-where', 'k=' + key);
+    dl.setAttribute('data-where', 'k=' + key);
+    numEl.classList.remove('dash-skeleton');
+    dl.classList.remove('dash-skeleton');
+    if (!r){ numEl.textContent = '—'; dl.textContent = '—'; continue; }
+    numEl.textContent = k.fmt(r[k.field]);
+    dl.textContent = k.kind === 'pp' ? pp(r[k.dfield]) : rel(r[k.dfield]);
+    dl.className = 'lx-delta ' + deltaClass(r[k.dfield], k.low, k.kind === 'pp' ? 0.05 : 0.0005);
+  }
+  const rev = document.getElementById('tk-rev');
+  rev.classList.remove('dash-skeleton');
+  rev.setAttribute('data-where', 'k=' + key);
+  rev.textContent = r ? money(r.revenue) : '—';
+  document.getElementById('tk-lead').textContent = 'Выручка за ' + WIN[period] + (channel === ALL ? ', все каналы' : ', канал «' + channel + '»');
+  const dw = document.getElementById('tk-dwrap');
+  dw.hidden = !(r && r.revenue_delta != null);
+  const td = document.getElementById('tk-delta');
+  td.setAttribute('data-where', 'k=' + key);
+  td.textContent = r ? rel(r.revenue_delta) : '—';
+  const best = channel === ALL ? kp.filter(x => x.period === period && x.channel !== ALL && x.revenue_delta != null).sort((a,b) => b.revenue_delta - a.revenue_delta)[0] : null;
+  document.getElementById('tk-toprow').hidden = !best;
+  if (best){
+    const tn = document.getElementById('tk-top'), tdd = document.getElementById('tk-topd');
+    tn.setAttribute('data-where', 'k=' + best.k);
+    tdd.setAttribute('data-where', 'k=' + best.k);
+    tn.textContent = best.channel;
+    tdd.textContent = rel(best.revenue_delta);
+  }
+}
+
+dash.onData(() => {
+  const P = dash.params();
+  const period = PERIODS.some(([v]) => v === P.period) ? P.period : '30';
+  const salesRows = rowsOf('sales_daily');
+  let channel = typeof P.channel === 'string' && P.channel ? P.channel : ALL;
+  if (salesRows && channel !== ALL && !salesRows.some(r => r.channel === channel)) channel = ALL;
+  renderControls(period, channel, salesRows);
+  const chNames = salesRows ? [...new Set(salesRows.map(r => r.channel))] : [];
+  ACCENT = channel === ALL || !chNames.includes(channel) ? C[0] : C[chNames.indexOf(channel) % C.length];
+
+  const asof = rowsOf('asof');
+  if (asof && asof[0]){
+    document.getElementById('asof-last').textContent = fmtDayY(day0(asof[0].as_of));
+    document.getElementById('asof-first').textContent = fmtDayY(day0(asof[0].first_date));
+  }
+
+  const kp = rowsOf('kpis');
+  if (kp) paintTiles(kp, period, channel);
+  else if (stateOf('kpis') === 'error'){ failTiles(); failRow('#tbl-channels', 9); }
+
+  const sState = stateOf('sales_daily');
+  const trendNote = document.getElementById('trend-note');
+  if (sState === 'ok'){
+    const parsed = parseSales(salesRows);
+    const S = buildSeries(parsed, channel, period);
+    trendNote.textContent = 'Сумма продаж за день, ' + WIN[period] + (channel === ALL ? ', все каналы' : ', канал «' + channel + '»') + (S.prev ? '. Пунктир показывает предыдущий период такой же длины.' : '. Для всего периода сравнения нет.');
+    for (const k of KPIS){
+      const host = document.querySelector('#tile-' + k.key + ' .lx-spark');
+      drawSpark(host, sparkValues(k.key, S.cur));
+    }
+    drawMain(document.getElementById('chart-main'), S, channel);
+    drawMix(document.getElementById('chart-mix'), S, parsed, period, channel);
+  } else if (sState === 'error'){
+    failBox(document.getElementById('chart-main'));
+    failBox(document.getElementById('chart-mix'));
+    document.querySelectorAll('.lx-spark').forEach(failBox);
+  }
+
+  const pfState = stateOf('plan_fact');
+  if (pfState === 'ok') drawPlan(document.getElementById('chart-plan'), rowsOf('plan_fact'), channel);
+  else if (pfState === 'error') failBox(document.getElementById('chart-plan'));
+
+  if (kp) drawChannels(kp, period, channel);
+  const tp = rowsOf('top_products');
+  if (tp){
+    document.getElementById('prod-note').textContent = 'Восемь товаров с наибольшей выручкой, ' + WIN[period] + (channel === ALL ? ', все каналы.' : ', канал «' + channel + '».');
+    drawProducts(tp, period, channel);
+  } else if (stateOf('top_products') === 'error') failRow('#tbl-products', 7);
+  const pl = rowsOf('pipeline');
+  if (pl) drawSources(pl);
+  else if (stateOf('pipeline') === 'error') failRow('#tbl-sources', 7);
+});
+</script>
+
+<script>
+window.__dashBoot(genData());
+</script>
+</body>
+</html>
