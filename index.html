@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Бизнес-метрики — панель продаж</title>
+<title>Business Metrics — Sales Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <style>
 :root{
-  /* Тема TradingView Dark */
+  /* TradingView Dark theme */
   --font-anthropic-sans: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif;
   --font-anthropic-serif: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif;
   --cds-font-size-body:14px;--cds-font-size-title:24px;
@@ -129,63 +129,63 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
 <div class="lx" id="lx-page">
   <header class="lx-head" id="top">
     <div class="lx-titlerow">
-      <h1 class="lx-title">Бизнес-метрики</h1>
+      <h1 class="lx-title">Business Metrics</h1>
     </div>
     <p class="lx-take" id="lx-take">
-      <span id="tk-lead">Выручка</span>: <span id="tk-rev" class="dash-skeleton" data-source="kpis" data-field="revenue">—</span><span id="tk-dwrap" hidden>, <span id="tk-delta" data-source="kpis" data-field="revenue_delta">—</span> к предыдущему периоду</span>.
-      <span id="tk-toprow" hidden>Быстрее всех растёт «<span id="tk-top" data-source="kpis" data-field="channel">—</span>»: <span id="tk-topd" data-source="kpis" data-field="revenue_delta">—</span>.</span>
+      <span id="tk-lead">Revenue</span>: <span id="tk-rev" class="dash-skeleton" data-source="kpis" data-field="revenue">—</span><span id="tk-dwrap" hidden>, <span id="tk-delta" data-source="kpis" data-field="revenue_delta">—</span> vs previous period</span>.
+      <span id="tk-toprow" hidden>Fastest growing: “<span id="tk-top" data-source="kpis" data-field="channel">—</span>”: <span id="tk-topd" data-source="kpis" data-field="revenue_delta">—</span>.</span>
     </p>
-    <p class="lx-note">Компания «Северный ветер», товары для дома. Данные собраны из CRM, учётной системы, рекламных кабинетов и выгрузок маркетплейсов. Данные на <span id="asof-last" data-source="asof" data-row="0" data-field="as_of">—</span>, история с <span id="asof-first" data-source="asof" data-row="0" data-field="first_date">—</span>.</p>
+    <p class="lx-note">North Wind Co., home goods (demo company, generated data). Data is pulled from CRM, accounting, ad accounts and marketplace exports. Data as of <span id="asof-last" data-source="asof" data-row="0" data-field="as_of">—</span>, history since <span id="asof-first" data-source="asof" data-row="0" data-field="first_date">—</span>.</p>
   </header>
 
-  <section class="lx-filters" id="filters" aria-label="Фильтры">
-    <div class="lx-fgroup"><span class="lx-flabel">Период</span><div class="lx-seg" id="lx-period" role="group" aria-label="Период"></div></div>
-    <div class="lx-fgroup"><span class="lx-flabel">Канал</span><div class="lx-seg" id="lx-channel" role="group" aria-label="Канал"></div></div>
+  <section class="lx-filters" id="filters" aria-label="Filters">
+    <div class="lx-fgroup"><span class="lx-flabel">Period</span><div class="lx-seg" id="lx-period" role="group" aria-label="Period"></div></div>
+    <div class="lx-fgroup"><span class="lx-flabel">Channel</span><div class="lx-seg" id="lx-channel" role="group" aria-label="Channel"></div></div>
   </section>
 
-  <section id="kpi" class="lx-kpi" aria-label="Ключевые показатели"><div class="lx-tiles" id="lx-tiles">
+  <section id="kpi" class="lx-kpi" aria-label="Key metrics"><div class="lx-tiles" id="lx-tiles">
       <article class="lx-tile" id="tile-revenue">
-        <div class="lx-tile-top"><span class="lx-tile-name">Выручка</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-tile-top"><span class="lx-tile-name">Revenue</span><span class="lx-win" data-win>—</span></div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="revenue">—</div>
-        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="revenue_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="revenue_delta">—</span><span class="lx-vs">vs prev. period</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-orders">
-        <div class="lx-tile-top"><span class="lx-tile-name">Заказы</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-tile-top"><span class="lx-tile-name">Orders</span><span class="lx-win" data-win>—</span></div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="orders">—</div>
-        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="orders_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="orders_delta">—</span><span class="lx-vs">vs prev. period</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-aov">
-        <div class="lx-tile-top"><span class="lx-tile-name">Средний чек</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-tile-top"><span class="lx-tile-name">Avg. order value</span><span class="lx-win" data-win>—</span></div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="aov">—</div>
-        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="aov_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="aov_delta">—</span><span class="lx-vs">vs prev. period</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-margin">
-        <div class="lx-tile-top"><span class="lx-tile-name">Валовая маржа</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-tile-top"><span class="lx-tile-name">Gross margin</span><span class="lx-win" data-win>—</span></div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="margin">—</div>
-        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="margin_delta_pp">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="margin_delta_pp">—</span><span class="lx-vs">vs prev. period</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-drr">
-        <div class="lx-tile-top"><span class="lx-tile-name">Доля рекламы</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-tile-top"><span class="lx-tile-name">Ad spend share</span><span class="lx-win" data-win>—</span></div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="drr">—</div>
-        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="drr_delta_pp">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="drr_delta_pp">—</span><span class="lx-vs">vs prev. period</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
       <article class="lx-tile" id="tile-new">
-        <div class="lx-tile-top"><span class="lx-tile-name">Новые клиенты</span><span class="lx-win" data-win>—</span></div>
+        <div class="lx-tile-top"><span class="lx-tile-name">New customers</span><span class="lx-win" data-win>—</span></div>
         <div class="lx-num dash-skeleton" data-source="kpis" data-field="new_customers">—</div>
-        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="new_delta">—</span><span class="lx-vs">к пред. периоду</span></div>
+        <div class="lx-dline"><span class="lx-delta dash-skeleton" data-source="kpis" data-field="new_delta">—</span><span class="lx-vs">vs prev. period</span></div>
         <div class="lx-spark dash-skeleton" data-source="sales_daily"></div>
       </article>
     </div></section>
 
   <section class="lx-card" id="trend">
     <div class="lx-card-head">
-      <h2 class="lx-h">Выручка по дням</h2>
-      <p class="lx-note" id="trend-note">Сумма продаж за день; пунктир показывает предыдущий период такой же длины.</p>
+      <h2 class="lx-h">Daily revenue</h2>
+      <p class="lx-note" id="trend-note">Sales per day; the dashed line shows the previous period of the same length.</p>
     </div>
     <div class="lx-chart lx-chart-main dash-skeleton" id="chart-main" data-source="sales_daily"></div>
   </section>
@@ -193,15 +193,15 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
   <div class="lx-grid2">
     <section class="lx-card" id="plan">
       <div class="lx-card-head">
-        <h2 class="lx-h">План и факт по месяцам</h2>
-        <p class="lx-note">Выручка выбранного канала против плана.</p>
+        <h2 class="lx-h">Plan vs actual by month</h2>
+        <p class="lx-note">Revenue of the selected channel against the plan.</p>
       </div>
       <div class="lx-chart lx-chart-sm dash-skeleton" id="chart-plan" data-source="plan_fact"></div>
     </section>
     <section class="lx-card" id="mix">
       <div class="lx-card-head">
-        <h2 class="lx-h">Выручка по каналам</h2>
-        <p class="lx-note" id="mix-note">Структура выручки за выбранный период.</p>
+        <h2 class="lx-h">Revenue by channel</h2>
+        <p class="lx-note" id="mix-note">Revenue mix for the selected period.</p>
       </div>
       <div class="lx-chart lx-chart-sm dash-skeleton" id="chart-mix" data-source="sales_daily"></div>
     </section>
@@ -209,21 +209,21 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
 
   <section class="lx-card" id="channels">
     <div class="lx-card-head">
-      <h2 class="lx-h">Каналы продаж</h2>
-      <p class="lx-note">Нажмите на название канала, чтобы отфильтровать панель.</p>
+      <h2 class="lx-h">Sales channels</h2>
+      <p class="lx-note">Click a channel name to filter the dashboard.</p>
     </div>
     <div class="lx-scroll">
       <table class="lx-table" id="tbl-channels" data-source="kpis" data-row-key="k">
         <thead><tr>
-          <th data-field="channel">Канал</th>
-          <th data-field="revenue" class="num">Выручка</th>
-          <th data-field="share" class="num lx-hide-xs">Доля</th>
-          <th data-field="orders" class="num lx-hide-sm">Заказы</th>
-          <th data-field="aov" class="num lx-hide-sm">Ср. чек</th>
-          <th data-field="margin" class="num">Маржа</th>
-          <th data-field="drr" class="num lx-hide-sm">ДРР</th>
-          <th data-field="conversion" class="num lx-hide-sm">Конверсия</th>
-          <th data-field="revenue_delta" class="num">Δ выручки</th>
+          <th data-field="channel">Channel</th>
+          <th data-field="revenue" class="num">Revenue</th>
+          <th data-field="share" class="num lx-hide-xs">Share</th>
+          <th data-field="orders" class="num lx-hide-sm">Orders</th>
+          <th data-field="aov" class="num lx-hide-sm">AOV</th>
+          <th data-field="margin" class="num">Margin</th>
+          <th data-field="drr" class="num lx-hide-sm">ACoS</th>
+          <th data-field="conversion" class="num lx-hide-sm">Conversion</th>
+          <th data-field="revenue_delta" class="num">Δ of revenue</th>
         </tr></thead>
         <tbody><tr><td colspan="9"><div class="lx-skel-row dash-skeleton"></div></td></tr></tbody>
       </table>
@@ -232,19 +232,19 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
 
   <section class="lx-card" id="products">
     <div class="lx-card-head">
-      <h2 class="lx-h">Топ товаров</h2>
-      <p class="lx-note" id="prod-note">Восемь товаров с наибольшей выручкой.</p>
+      <h2 class="lx-h">Top products</h2>
+      <p class="lx-note" id="prod-note">Eight products with the highest revenue.</p>
     </div>
     <div class="lx-scroll">
       <table class="lx-table" id="tbl-products" data-source="top_products" data-row-key="k">
         <thead><tr>
-          <th data-field="name">Товар</th>
-          <th data-field="category" class="lx-hide-sm">Категория</th>
-          <th data-field="revenue" class="num">Выручка</th>
-          <th data-field="share" class="num lx-hide-xs">Доля</th>
-          <th data-field="units" class="num lx-hide-sm">Штук</th>
-          <th data-field="margin" class="num lx-hide-xs">Маржа</th>
-          <th data-field="revenue_delta" class="num">Δ выручки</th>
+          <th data-field="name">Product</th>
+          <th data-field="category" class="lx-hide-sm">Category</th>
+          <th data-field="revenue" class="num">Revenue</th>
+          <th data-field="share" class="num lx-hide-xs">Share</th>
+          <th data-field="units" class="num lx-hide-sm">Units</th>
+          <th data-field="margin" class="num lx-hide-xs">Margin</th>
+          <th data-field="revenue_delta" class="num">Δ of revenue</th>
         </tr></thead>
         <tbody><tr><td colspan="7"><div class="lx-skel-row dash-skeleton"></div></td></tr></tbody>
       </table>
@@ -253,19 +253,19 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
 
   <section class="lx-card" id="sources">
     <div class="lx-card-head">
-      <h2 class="lx-h">Источники данных</h2>
-      <p class="lx-note">Откуда панель берёт цифры (время UTC).</p>
+      <h2 class="lx-h">Data sources</h2>
+      <p class="lx-note">Where the numbers come from (UTC time).</p>
     </div>
     <div class="lx-scroll">
       <table class="lx-table" id="tbl-sources" data-source="pipeline" data-row-key="system">
         <thead><tr>
-          <th data-field="system">Источник</th>
-          <th data-field="type" class="lx-hide-sm">Тип</th>
-          <th data-field="schedule" class="lx-hide-sm">Обновление</th>
-          <th data-field="last_sync">Обновлено</th>
-          <th data-field="status">Статус</th>
-          <th data-field="rows_loaded" class="num lx-hide-sm">Строк</th>
-          <th data-field="note" class="lx-hide-sm">Примечание</th>
+          <th data-field="system">Source</th>
+          <th data-field="type" class="lx-hide-sm">Type</th>
+          <th data-field="schedule" class="lx-hide-sm">Schedule</th>
+          <th data-field="last_sync">Updated</th>
+          <th data-field="status">Status</th>
+          <th data-field="rows_loaded" class="num lx-hide-sm">Rows</th>
+          <th data-field="note" class="lx-hide-sm">Note</th>
         </tr></thead>
         <tbody><tr><td colspan="7"><div class="lx-skel-row dash-skeleton"></div></td></tr></tbody>
       </table>
@@ -274,22 +274,22 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
 
   <footer class="lx-foot" id="about">
     <details>
-      <summary>Как считаются показатели</summary>
+      <summary>How metrics are calculated</summary>
       <dl>
-        <dt>Валовая маржа</dt><dd>(выручка − себестоимость) ÷ выручка.</dd>
-        <dt>Доля рекламы (ДРР)</dt><dd>расходы на рекламу ÷ выручка. Чем ниже, тем лучше.</dd>
-        <dt>Средний чек</dt><dd>выручка ÷ число заказов.</dd>
-        <dt>Конверсия</dt><dd>заказы ÷ посещения (для интернет-магазина и маркетплейсов).</dd>
+        <dt>Gross margin</dt><dd>(revenue − cost of goods) ÷ revenue.</dd>
+        <dt>Ad spend share (ACoS)</dt><dd>ad spend ÷ revenue. Lower is better.</dd>
+        <dt>Avg. order value</dt><dd>revenue ÷ number of orders.</dd>
+        <dt>Conversion</dt><dd>orders ÷ visits (online store and marketplaces).</dd>
       </dl>
     </details>
   </footer>
 </div>
 
 <script>
-/* ==== минимальная замена фреймворка dash ==== */
+/* ==== minimal replacement for the dash framework ==== */
 (function(){
   const _raw = {}, _store = new Map(), _calcs = new Map(), _subs = [];
-  let _params = {period:'30', channel:'Все каналы'}, _ready = false;
+  let _params = {period:'30', channel:'All channels'}, _ready = false;
   function recompute(){
     for (const [id, def] of _calcs){
       const inputs = def.inputs.map(i => _raw[i]);
@@ -300,7 +300,7 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
   }
   function emit(){ _subs.forEach(fn => fn()); }
   window.dash = {
-    // Цвета TradingView
+    // TradingView colors
     colors:['#2962FF', '#089981', '#f23645', '#ff9800', '#9c27b0', '#00bcd4', '#ffeb3b', '#e91e63'],
     calc(id, def){ _calcs.set(id, def); },
     data(id){
@@ -315,31 +315,31 @@ body{margin:0;padding:24px 16px 48px;background:var(--color-bg);color:var(--colo
   window.__dashBoot = function(raw){ Object.assign(_raw, raw); recompute(); _ready = true; emit(); };
 })();
 
-/* ==== генератор данных ==== */
+/* ==== data generator ==== */
 function genData(){
-  const CH = ['Интернет-магазин','Маркетплейсы','Розница','Опт'];
+  const CH = ['Online store','Marketplaces','Retail','Wholesale'];
   const P = [
-    ['SKU-01','Ваза керамическая «Волна»','Декор',2400],
-    ['SKU-02','Плед шерстяной «Тайга»','Текстиль',5400],
-    ['SKU-03','Настольная лампа «Янтарь»','Освещение',3200],
-    ['SKU-04','Набор свечей «Сосна»','Декор',1200],
-    ['SKU-05','Кружка «Утро» 350 мл','Посуда',890],
-    ['SKU-06','Поднос дубовый 40×25','Посуда',2100],
-    ['SKU-07','Корзина плетёная','Хранение',1600],
-    ['SKU-08','Полка настенная «Линия»','Мебель',4800],
-    ['SKU-09','Коврик придверный','Текстиль',990],
-    ['SKU-10','Аромадиффузор «Кедр»','Ароматы',1900],
-    ['SKU-11','Постер «Север» 30×40','Декор',1400],
-    ['SKU-12','Органайзер для мелочей','Хранение',750]
+    ['SKU-01','Ceramic vase “Wave”','Decor',2400],
+    ['SKU-02','Wool throw “Taiga”','Textiles',5400],
+    ['SKU-03','Table lamp “Amber”','Lighting',3200],
+    ['SKU-04','Candle set “Pine”','Decor',1200],
+    ['SKU-05','Mug “Morning” 12 oz','Tableware',890],
+    ['SKU-06','Oak tray 40×25','Tableware',2100],
+    ['SKU-07','Woven basket','Storage',1600],
+    ['SKU-08','Wall shelf “Line”','Furniture',4800],
+    ['SKU-09','Door mat','Textiles',990],
+    ['SKU-10','Reed diffuser “Cedar”','Fragrance',1900],
+    ['SKU-11','Poster “North” 30×40','Decor',1400],
+    ['SKU-12','Desk organizer','Storage',750]
   ];
   let s = 20250531;
   const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
   const N = 400, END = Date.UTC(2025,4,31);
   const cfg = {
-    'Интернет-магазин':{base:175000,g:0.0012,aov:4200,cogs:0.58,ad:0.14,conv:0.028,wk:0.22},
-    'Маркетплейсы':{base:235000,g:0.0021,aov:3100,cogs:0.63,ad:0.19,conv:0.041,wk:0.15},
-    'Розница':{base:88000,g:0.0004,aov:2600,cogs:0.55,ad:0.05,conv:0,wk:0.35},
-    'Опт':{base:155000,g:0.0006,aov:68000,cogs:0.68,ad:0.02,conv:0,wk:0.10}
+    'Online store':{base:175000,g:0.0012,aov:4200,cogs:0.58,ad:0.14,conv:0.028,wk:0.22},
+    'Marketplaces':{base:235000,g:0.0021,aov:3100,cogs:0.63,ad:0.19,conv:0.041,wk:0.15},
+    'Retail':{base:88000,g:0.0004,aov:2600,cogs:0.55,ad:0.05,conv:0,wk:0.35},
+    'Wholesale':{base:155000,g:0.0006,aov:68000,cogs:0.68,ad:0.02,conv:0,wk:0.10}
   };
   const sales = [], prods = [];
   for (let i = 0; i < N; i++){
@@ -351,7 +351,7 @@ function genData(){
       let rev = c.base * Math.pow(1 + c.g, i);
       rev *= 1 + c.wk * ((dow === 0 || dow === 6) ? 1 : 0) - c.wk * 0.35 * (dow === 1 ? 1 : 0);
       rev *= 0.82 + rnd() * 0.36;
-      if (ch === 'Опт') rev *= (rnd() < 0.42 ? 1.9 : 0.62);
+      if (ch === 'Wholesale') rev *= (rnd() < 0.42 ? 1.9 : 0.62);
       rev = Math.round(rev);
       const orders = Math.max(1, Math.round(rev / (c.aov * (0.92 + rnd() * 0.16))));
       sales.push({
@@ -385,12 +385,12 @@ function genData(){
     plan.push({month: m, channel: ch, revenue_plan: Math.round(f * (0.94 + rnd() * 0.18))});
   }
   const pipeline = [
-    {system:'CRM (amoCRM)', type:'API', schedule:'каждые 15 минут', last_sync:'2025-05-31T18:45:00Z', status:'ok', rows_loaded:18422, note:'сделки и оплаты'},
-    {system:'1С:Управление торговлей', type:'Выгрузка', schedule:'раз в час', last_sync:'2025-05-31T18:10:00Z', status:'ok', rows_loaded:9310, note:'себестоимость и остатки'},
-    {system:'Яндекс.Директ', type:'API', schedule:'раз в 3 часа', last_sync:'2025-05-31T16:00:00Z', status:'delay', rows_loaded:2410, note:'расходы на рекламу, задержка 2 ч'},
-    {system:'Ozon Seller API', type:'API', schedule:'каждые 30 минут', last_sync:'2025-05-31T18:40:00Z', status:'ok', rows_loaded:6120, note:'заказы и выручка маркетплейса'},
-    {system:'Wildberries API', type:'API', schedule:'каждые 30 минут', last_sync:'2025-05-31T17:20:00Z', status:'error', rows_loaded:0, note:'ошибка авторизации, токен истёк'},
-    {system:'Google Таблицы', type:'Импорт', schedule:'раз в день', last_sync:'2025-05-31T06:00:00Z', status:'ok', rows_loaded:880, note:'ручные корректировки розницы'}
+    {system:'CRM (amoCRM)', type:'API', schedule:'every 15 min', last_sync:'2025-05-31T18:45:00Z', status:'ok', rows_loaded:18422, note:'deals and payments'},
+    {system:'QuickBooks', type:'Export', schedule:'hourly', last_sync:'2025-05-31T18:10:00Z', status:'ok', rows_loaded:9310, note:'cost of goods and stock'},
+    {system:'Google Ads', type:'API', schedule:'every 3 hours', last_sync:'2025-05-31T16:00:00Z', status:'delay', rows_loaded:2410, note:'ad spend, 2 h delay'},
+    {system:'Ozon Seller API', type:'API', schedule:'every 30 min', last_sync:'2025-05-31T18:40:00Z', status:'ok', rows_loaded:6120, note:'marketplace orders and revenue'},
+    {system:'Wildberries API', type:'API', schedule:'every 30 min', last_sync:'2025-05-31T17:20:00Z', status:'error', rows_loaded:0, note:'auth error, token expired'},
+    {system:'Google Sheets', type:'Import', schedule:'daily', last_sync:'2025-05-31T06:00:00Z', status:'ok', rows_loaded:880, note:'manual retail adjustments'}
   ];
   return {sales_daily: sales, product_sales: prods, plan_monthly: plan, pipeline};
 }
@@ -398,16 +398,16 @@ function genData(){
 
 <script>
 'use strict';
-const ALL = 'Все каналы';
-const PERIODS = [['30','30 дней'],['90','90 дней'],['180','180 дней'],['all','Весь период']];
-const WIN = {'30':'30 дней','90':'90 дней','180':'180 дней', all:'весь период'};
+const ALL = 'All channels';
+const PERIODS = [['30','30 days'],['90','90 days'],['180','180 days'],['all','All time']];
+const WIN = {'30':'30 days','90':'90 days','180':'180 days', all:'all time'};
 const NB = ' ';
 const DAY = 86400000;
 const C = dash.colors;
 let ACCENT = C[0];
 
 dash.calc('asof', {
-  inputs:['sales_daily'], title:'Период данных', description:'Первая и последняя даты в продажах по дням.',
+  inputs:['sales_daily'], title:'Data period', description:'First and last dates in daily sales.',
   fn:(sales_daily) => {
     const days = sales_daily.map(r => r.date.slice(0,10)).sort();
     const first = days[0], last = days[days.length-1];
@@ -416,9 +416,9 @@ dash.calc('asof', {
 });
 
 dash.calc('kpis', {
-  inputs:['sales_daily'], title:'Показатели по периодам', description:'Выручка, заказы, чек, маржа, реклама и новые клиенты.',
+  inputs:['sales_daily'], title:'Metrics by period', description:'Revenue, orders, AOV, margin, ad spend and new customers.',
   fn:(sales_daily) => {
-    const DAY = 86400000, ALL = 'Все каналы';
+    const DAY = 86400000, ALL = 'All channels';
     const rows = sales_daily.map(r => ({d:r.date.slice(0,10), ch:r.channel, rev:+r.revenue, ord:+r.orders, cogs:+r.cogs, ad:+r.ad_spend, nw:+r.new_customers, ses:+r.sessions||0}));
     const iso = t => new Date(t).toISOString().slice(0,10);
     const last = rows.reduce((m,r) => (r.d>m?r.d:m), '');
@@ -461,9 +461,9 @@ dash.calc('kpis', {
 });
 
 dash.calc('top_products', {
-  inputs:['product_sales'], title:'Товары по периодам', description:'Выручка, доля, штуки, маржа и динамика каждого товара.',
+  inputs:['product_sales'], title:'Products by period', description:'Revenue, share, units, margin and trend for each product.',
   fn:(product_sales) => {
-    const DAY = 86400000, ALL = 'Все каналы';
+    const DAY = 86400000, ALL = 'All channels';
     const rows = product_sales.map(r => ({d:r.date.slice(0,10), ch:r.channel, sku:r.sku, name:r.name, cat:r.category, rev:+r.revenue, u:+r.units, cogs:+r.cogs}));
     const iso = t => new Date(t).toISOString().slice(0,10);
     const last = rows.reduce((m,r) => (r.d>m?r.d:m), '');
@@ -507,9 +507,9 @@ dash.calc('top_products', {
 });
 
 dash.calc('plan_fact', {
-  inputs:['sales_daily','plan_monthly'], title:'План и факт', description:'Выручка по месяцам против плана.',
+  inputs:['sales_daily','plan_monthly'], title:'Plan vs actual', description:'Monthly revenue against the plan.',
   fn:(sales_daily, plan_monthly) => {
-    const ALL = 'Все каналы';
+    const ALL = 'All channels';
     const last = sales_daily.reduce((m,r) => (r.date>m?r.date:m), '').slice(0,10);
     const lastMonth = last.slice(0,7), elapsed = +last.slice(8,10);
     const dim = ym => new Date(Date.UTC(+ym.slice(0,4), +ym.slice(5,7), 0)).getUTCDate();
@@ -536,11 +536,12 @@ dash.calc('plan_fact', {
   }
 });
 
-const ru = d3.formatLocale({decimal:',', thousands:NB, grouping:[3], currency:['',NB+'₽']});
+const ru = d3.formatLocale({decimal:'.', thousands:',', grouping:[3], currency:['$','']});
+const FX = 90; // demo data is generated in RUB, shown in USD
 const fInt = ru.format(',.0f'), f1 = ru.format(',.1f'), f2 = ru.format(',.2f');
 const fP0 = ru.format('.0%'), fP1 = ru.format('.1%');
-const MG = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-const MN = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const MG = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const p2 = n => String(n).padStart(2,'0');
 const num = x => { const n = Number(x); return Number.isFinite(n) ? n : 0; };
 const day0 = s => Date.parse(String(s).slice(0,10));
@@ -550,30 +551,31 @@ const fmtMon = t => { const d = new Date(t); return MN[d.getUTCMonth()] + (d.get
 const fmtMonY = t => { const d = new Date(t); return MN[d.getUTCMonth()] + NB + d.getUTCFullYear(); };
 const fmtTs = s => { const d = new Date(s); return Number.isNaN(+d) ? String(s) : p2(d.getUTCDate())+'.'+p2(d.getUTCMonth()+1)+' '+p2(d.getUTCHours())+':'+p2(d.getUTCMinutes()); };
 const money = v => {
+  v = v / FX;
   const a = Math.abs(v);
-  if (a >= 1e9) return f2(v/1e9) + NB + 'млрд' + NB + '₽';
-  if (a >= 1e6) return f1(v/1e6) + NB + 'млн' + NB + '₽';
-  if (a >= 1e3) return fInt(Math.round(v/1e3)) + NB + 'тыс.' + NB + '₽';
-  return fInt(v) + NB + '₽';
+  if (a >= 1e9) return '$' + f2(v/1e9) + 'B';
+  if (a >= 1e6) return '$' + f1(v/1e6) + 'M';
+  if (a >= 1e3) return '$' + fInt(Math.round(v/1e3)) + 'K';
+  return '$' + fInt(v);
 };
-const rub = v => fInt(v) + NB + '₽';
+const rub = v => '$' + fInt(v / FX);
 const fMil = m => (Math.abs(m - Math.round(m)) < 1e-9 ? fInt(Math.round(m)) : f1(m));
-const axisMoney = v => (v === 0 ? '0' : Math.abs(v) >= 1e6 ? fMil(v/1e6) + NB + 'млн' : fInt(Math.round(v/1e3)) + NB + 'тыс.');
+const axisMoney = v => (v = v / FX, v === 0 ? '0' : Math.abs(v) >= 1e6 ? '$' + fMil(v/1e6) + 'M' : '$' + fInt(Math.round(v/1e3)) + 'K');
 const sgn = v => (v > 0 ? '+' : v < 0 ? '-' : '');
 const rel = v => (v == null ? '—' : sgn(Math.round(v*1000)/1000) + fP1(Math.abs(v)));
-const pp = v => (v == null ? '—' : sgn(Math.round(v*10)/10) + f1(Math.abs(v)) + NB + 'п.п.');
+const pp = v => (v == null ? '—' : sgn(Math.round(v*10)/10) + f1(Math.abs(v)) + NB + 'p.p.');
 const deltaClass = (v, low, eps = 0.0005) => {
   if (v == null || Math.abs(v) < eps) return 'flat';
   return (low ? v < 0 : v > 0) ? 'good' : 'bad';
 };
 
 const KPIS = [
-  {key:'revenue', name:'Выручка', field:'revenue', dfield:'revenue_delta', fmt:money, kind:'rel', hint:'сумма продаж за окно'},
-  {key:'orders', name:'Заказы', field:'orders', dfield:'orders_delta', fmt:fInt, kind:'rel', hint:'число оформленных заказов'},
-  {key:'aov', name:'Средний чек', field:'aov', dfield:'aov_delta', fmt:rub, kind:'rel', hint:'выручка ÷ заказы'},
-  {key:'margin', name:'Валовая маржа', field:'margin', dfield:'margin_delta_pp', fmt:fP1, kind:'pp', hint:'(выручка − себестоимость) ÷ выручка'},
-  {key:'drr', name:'Доля рекламы', field:'drr', dfield:'drr_delta_pp', fmt:fP1, kind:'pp', low:true, hint:'расходы на рекламу ÷ выручка (ДРР)'},
-  {key:'new', name:'Новые клиенты', field:'new_customers', dfield:'new_delta', fmt:fInt, kind:'rel', hint:'первая покупка в окне'}
+  {key:'revenue', name:'Revenue', field:'revenue', dfield:'revenue_delta', fmt:money, kind:'rel', hint:'total sales in the window'},
+  {key:'orders', name:'Orders', field:'orders', dfield:'orders_delta', fmt:fInt, kind:'rel', hint:'number of placed orders'},
+  {key:'aov', name:'Avg. order value', field:'aov', dfield:'aov_delta', fmt:rub, kind:'rel', hint:'revenue ÷ orders'},
+  {key:'margin', name:'Gross margin', field:'margin', dfield:'margin_delta_pp', fmt:fP1, kind:'pp', hint:'(revenue − cost of goods) ÷ revenue'},
+  {key:'drr', name:'Ad spend share', field:'drr', dfield:'drr_delta_pp', fmt:fP1, kind:'pp', low:true, hint:'ad spend ÷ revenue (ACoS)'},
+  {key:'new', name:'New customers', field:'new_customers', dfield:'new_delta', fmt:fInt, kind:'rel', hint:'first purchase in the window'}
 ];
 
 const el = (tag, cls, text) => {
@@ -592,7 +594,7 @@ const prep = host => { host.replaceChildren(); host.classList.remove('dash-skele
 const failBox = host => {
   prep(host);
   const f = el('div','lx-fail');
-  f.append(el('i','lx-faildot'), el('span',null,'Не удалось загрузить'));
+  f.append(el('i','lx-faildot'), el('span',null,'Failed to load'));
   host.appendChild(f);
 };
 const failRow = (sel, cols) => {
@@ -600,7 +602,7 @@ const failRow = (sel, cols) => {
   const tr = el('tr'), td = el('td');
   td.colSpan = cols;
   const f = el('div','lx-fail row');
-  f.append(el('i','lx-faildot'), el('span',null,'Не удалось загрузить'));
+  f.append(el('i','lx-faildot'), el('span',null,'Failed to load'));
   td.appendChild(f); tr.appendChild(td); tb.replaceChildren(tr);
 };
 const failTiles = () => {
@@ -703,7 +705,7 @@ function sparkValues(key, c){
 function drawSpark(host, vals){
   prep(host);
   const w = Math.max(80, host.clientWidth || 160), h = 36;
-  const svg = mkSvg(host, w, h, 'Тренд').attr('aria-hidden','true');
+  const svg = mkSvg(host, w, h, 'Trend').attr('aria-hidden','true');
   const x = d3.scaleLinear([0, Math.max(1, vals.length-1)], [3, w-5]);
   const lo = d3.min(vals), hi = d3.max(vals), pad = (hi-lo)*0.15 || 1;
   const y = d3.scaleLinear([lo-pad, hi+pad], [h-4, 4]);
@@ -715,11 +717,11 @@ function drawSpark(host, vals){
 function drawMain(host, S, channel){
   prep(host);
   const hasPrev = !!S.prev;
-  const items = [{name: channel === ALL ? 'Выручка, все каналы' : 'Выручка: ' + channel, color: ACCENT}];
-  if (hasPrev) items.push({name:'Предыдущие ' + S.n + ' дн.', color:'var(--cds-chart-muted)', dash:true});
+  const items = [{name: channel === ALL ? 'Revenue, all channels' : 'Revenue: ' + channel, color: ACCENT}];
+  if (hasPrev) items.push({name:'Previous ' + S.n + ' days', color:'var(--cds-chart-muted)', dash:true});
   host.appendChild(legend(items));
   const w = Math.max(260, host.clientWidth || 640), h = 300;
-  const svg = mkSvg(host, w, h, 'Выручка по дням');
+  const svg = mkSvg(host, w, h, 'Daily revenue');
   const cur = S.cur.rev, prv = hasPrev ? S.prev.rev : [];
   const y = d3.scaleLinear([0, d3.max(cur.concat(prv)) || 1], [h-28, 12]).nice(4);
   const yt = y.ticks(4);
@@ -760,10 +762,10 @@ function drawMain(host, S, channel){
       const X = px(i);
       rule.attr('x1',X).attr('x2',X).style('display',null);
       dotC.attr('cx',X).attr('cy',y(cur[i])).style('display',null);
-      const rows = [{color:ACCENT, k:'Выручка', v:money(cur[i])}];
+      const rows = [{color:ACCENT, k:'Revenue', v:money(cur[i])}];
       if (hasPrev){
         dotP.attr('cx',X).attr('cy',y(prv[i])).style('display',null);
-        rows.push({color:'var(--cds-chart-muted)', k:'Было ' + fmtDay(S.days[i] - S.n*DAY), v:money(prv[i])});
+        rows.push({color:'var(--cds-chart-muted)', k:'Was ' + fmtDay(S.days[i] - S.n*DAY), v:money(prv[i])});
       }
       tipFill(tip, fmtDayY(S.days[i]), rows);
       tipPlace(host, tip, node, X, y(cur[i]));
@@ -775,12 +777,12 @@ function drawPlan(host, rows, channel){
   prep(host);
   const data = rows.filter(r => r.channel === channel).sort((a,b) => (a.month < b.month ? -1 : 1));
   host.appendChild(legend([
-    {name:'Факт не ниже плана', color:ACCENT},
-    {name:'Факт ниже плана', color:'var(--cds-chart-status-critical)'},
-    {name:'План', color:'var(--cds-chart-reference)', line:true}
+    {name:'Actual at or above plan', color:ACCENT},
+    {name:'Actual below plan', color:'var(--cds-chart-status-critical)'},
+    {name:'Plan', color:'var(--cds-chart-reference)', line:true}
   ]));
   const w = Math.max(260, host.clientWidth || 420), h = 260, pb = h-40;
-  const svg = mkSvg(host, w, h, 'План и факт по месяцам');
+  const svg = mkSvg(host, w, h, 'Plan vs actual by month');
   const y = d3.scaleLinear([0, d3.max(data, r => Math.max(r.fact,r.plan)) || 1], [pb,16]).nice(4);
   const yt = y.ticks(4);
   const ml = Math.ceil(d3.max(yt, t => textW(svg, axisMoney(t)))) + 12;
@@ -809,10 +811,10 @@ function drawPlan(host, rows, channel){
     svg.append('rect').attr('x',x0).attr('y',0).attr('width',x.step()).attr('height',pb).attr('fill','transparent').style('touch-action','pan-y')
       .on('pointermove', () => {
         band.attr('x',x0).attr('width',x.step()).style('display',null);
-        tipFill(tip, fmtMonY(mt(r.month)) + (r.partial ? ' (месяц идёт)' : ''), [
-          {color: r.pct >= 1 ? ACCENT : 'var(--cds-chart-status-critical)', k:'Факт', v:money(r.fact)},
-          {k: r.partial ? 'План на прошедшие дни' : 'План', v:money(r.plan)},
-          {k:'Выполнение', v:fP0(r.pct)}
+        tipFill(tip, fmtMonY(mt(r.month)) + (r.partial ? ' (month in progress)' : ''), [
+          {color: r.pct >= 1 ? ACCENT : 'var(--cds-chart-status-critical)', k:'Actual', v:money(r.fact)},
+          {k: r.partial ? 'Plan to date' : 'Plan', v:money(r.plan)},
+          {k:'Achieved', v:fP0(r.pct)}
         ]);
         tipPlace(host, tip, node, x(r.month)+bw/2, y(Math.max(r.fact,r.plan)));
       })
@@ -842,7 +844,7 @@ function drawMix(host, S, parsed, period, channel){
   bs.forEach(b => { b.total = chs.reduce((s,c) => s + (b.vals[c]||0), 0); });
   const stack = d3.stack().keys(chs).value((b,k) => b.vals[k]||0)(bs);
   const w = Math.max(260, host.clientWidth || 420), h = 260, pb = h-40;
-  const svg = mkSvg(host, w, h, 'Выручка по каналам');
+  const svg = mkSvg(host, w, h, 'Revenue by channel');
   const y = d3.scaleLinear([0, d3.max(bs, b => b.total) || 1], [pb,12]).nice(4);
   const yt = y.ticks(4);
   const ml = Math.ceil(d3.max(yt, t => textW(svg, axisMoney(t)))) + 12;
@@ -864,8 +866,8 @@ function drawMix(host, S, parsed, period, channel){
   const label = b => (mode === 'month' ? MN[new Date(b.from).getUTCMonth()] : fmtDay(b.from));
   const head = b => {
     if (mode === 'day') return fmtDayY(b.from);
-    if (mode === 'month') return fmtMonY(b.from) + (b.days < dim(b.from) ? ' (неполный месяц)' : '');
-    return fmtDay(b.from) + ' – ' + fmtDay(b.to) + (b.days < 7 ? ' (неполная неделя)' : '');
+    if (mode === 'month') return fmtMonY(b.from) + (b.days < dim(b.from) ? ' (partial month)' : '');
+    return fmtDay(b.from) + ' – ' + fmtDay(b.to) + (b.days < 7 ? ' (partial week)' : '');
   };
   placeLabels(svg, bs.map((b,i) => ({x:x(i)+bw/2, text:label(b), must: i === 0 || i === bs.length-1})), h-22, ml-4, w-2);
   if (mode === 'month') bs.forEach((b,i) => { if (i === 0 || new Date(b.from).getUTCMonth() === 0) svg.append('text').attr('class','lx-tick').attr('x',x(i)).attr('y',h-6).attr('text-anchor','start').text(String(new Date(b.from).getUTCFullYear())); });
@@ -878,7 +880,7 @@ function drawMix(host, S, parsed, period, channel){
       .on('pointermove', () => {
         band.attr('x',x0).attr('width',x.step()).style('display',null);
         const rows = chs.map((c,ci) => ({color:C[ci], k:c, v:money(b.vals[c]||0)})).reverse();
-        rows.push({k:'Всего', v:money(b.total)});
+        rows.push({k:'Total', v:money(b.total)});
         tipFill(tip, head(b), rows);
         tipPlace(host, tip, node, x(i)+bw/2, y(b.total));
       })
@@ -947,7 +949,7 @@ function drawProducts(tp, period, channel){
   }
 }
 
-const STATUS = {ok:'Работает', delay:'Задержка', error:'Ошибка'};
+const STATUS = {ok:'OK', delay:'Delayed', error:'Error'};
 function drawSources(rows){
   const tb = document.querySelector('#tbl-sources tbody');
   tb.replaceChildren();
@@ -1001,7 +1003,7 @@ function paintTiles(kp, period, channel){
     const numEl = root.querySelector('.lx-num');
     const dl = root.querySelector('.lx-delta');
     root.querySelector('[data-win]').textContent = WIN[period];
-    root.querySelector('.lx-vs').textContent = period === 'all' ? 'сравнения нет' : 'к пред. периоду';
+    root.querySelector('.lx-vs').textContent = period === 'all' ? 'no comparison' : 'vs prev. period';
     numEl.setAttribute('data-where', 'k=' + key);
     dl.setAttribute('data-where', 'k=' + key);
     numEl.classList.remove('dash-skeleton');
@@ -1015,7 +1017,7 @@ function paintTiles(kp, period, channel){
   rev.classList.remove('dash-skeleton');
   rev.setAttribute('data-where', 'k=' + key);
   rev.textContent = r ? money(r.revenue) : '—';
-  document.getElementById('tk-lead').textContent = 'Выручка за ' + WIN[period] + (channel === ALL ? ', все каналы' : ', канал «' + channel + '»');
+  document.getElementById('tk-lead').textContent = 'Revenue for ' + WIN[period] + (channel === ALL ? ', all channels' : ', channel “' + channel + '”');
   const dw = document.getElementById('tk-dwrap');
   dw.hidden = !(r && r.revenue_delta != null);
   const td = document.getElementById('tk-delta');
@@ -1057,7 +1059,7 @@ dash.onData(() => {
   if (sState === 'ok'){
     const parsed = parseSales(salesRows);
     const S = buildSeries(parsed, channel, period);
-    trendNote.textContent = 'Сумма продаж за день, ' + WIN[period] + (channel === ALL ? ', все каналы' : ', канал «' + channel + '»') + (S.prev ? '. Пунктир показывает предыдущий период такой же длины.' : '. Для всего периода сравнения нет.');
+    trendNote.textContent = 'Sales per day, ' + WIN[period] + (channel === ALL ? ', all channels' : ', channel “' + channel + '”') + (S.prev ? '. The dashed line shows the previous period of the same length.' : '. No comparison for all time.');
     for (const k of KPIS){
       const host = document.querySelector('#tile-' + k.key + ' .lx-spark');
       drawSpark(host, sparkValues(k.key, S.cur));
@@ -1077,7 +1079,7 @@ dash.onData(() => {
   if (kp) drawChannels(kp, period, channel);
   const tp = rowsOf('top_products');
   if (tp){
-    document.getElementById('prod-note').textContent = 'Восемь товаров с наибольшей выручкой, ' + WIN[period] + (channel === ALL ? ', все каналы.' : ', канал «' + channel + '».');
+    document.getElementById('prod-note').textContent = 'Eight products with the highest revenue, ' + WIN[period] + (channel === ALL ? ', all channels.' : ', channel “' + channel + '”.');
     drawProducts(tp, period, channel);
   } else if (stateOf('top_products') === 'error') failRow('#tbl-products', 7);
   const pl = rowsOf('pipeline');
